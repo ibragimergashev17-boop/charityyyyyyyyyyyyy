@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiveWorld — Global Charity Platform</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070d;--bg2:#0d0d18;--bg3:#12121f;--card:#161625;--card2:#1b1b2e;--accent:#00f0a8;--accent2:#8b5cf6;--accent3:#f43f5e;--gold:#fbbf24;--blue:#3b82f6;--text:#eeedf8;--text2:#8886a8;--text3:#44425e;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);--glow:0 0 60px rgba(0,240,168,0.12);--glow2:0 0 60px rgba(139,92,246,0.15);--r:18px}
+[data-theme="light"]{--bg:#f5f5f7;--bg2:#ebebef;--bg3:#e0e0e8;--card:#ffffff;--card2:#f0f0f5;--accent:#00b87a;--accent2:#7c3aed;--accent3:#e11d48;--text:#111118;--text2:#4a4a6a;--text3:#9090aa;--border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.12)}
+[data-theme="light"] body::after{opacity:.01}
+[data-theme="light"] .orb1{background:rgba(0,184,122,.06)}
+[data-theme="light"] .orb2{background:rgba(124,58,237,.07)}
+[data-theme="light"] nav{background:rgba(245,245,247,.85)}
+[data-theme="light"] #leafletMap .leaflet-tile-pane{filter:brightness(1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none}
+#cur{width:10px;height:10px;background:var(--accent);border-radius:50%;position:fixed;pointer-events:none;z-index:99999;mix-blend-mode:screen}
+#cur-ring{width:38px;height:38px;border:1.5px solid rgba(0,240,168,.4);border-radius:50%;position:fixed;pointer-events:none;z-index:99998;transition:all .25s ease}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.025}
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);animation:orbFloat 20s ease-in-out infinite}
+.orb1{width:600px;height:600px;background:rgba(0,240,168,.05);top:-10%;left:-10%}
+.orb2{width:500px;height:500px;background:rgba(139,92,246,.07);bottom:0;right:-10%;animation-delay:-7s}
+.orb3{width:400px;height:400px;background:rgba(244,63,94,.04);top:40%;left:40%;animation-delay:-14s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(25px,-30px)}}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:70px;padding:0 4%;display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,13,.75);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:1.4rem;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.logo-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-logo em{color:var(--accent);font-style:normal}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-end{display:flex;align-items:center;gap:10px}
+.nbtn{padding:8px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;letter-spacing:.02em}
+.nbtn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.nbtn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.nbtn-solid{background:linear-gradient(135deg,var(--accent),#00d490);color:#07070d;box-shadow:0 4px 20px rgba(0,240,168,.25)}
+.nbtn-solid:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(0,240,168,.4)}
+/* HERO */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 5% 60px;overflow:hidden}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 14px 5px 6px;background:rgba(0,240,168,.08);border:1px solid rgba(0,240,168,.2);border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:28px;animation:fadeUp .7s ease both}
+.pulse-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pd 2s infinite}
+@keyframes pd{0%,100%{box-shadow:0 0 0 0 rgba(0,240,168,.4)}70%{box-shadow:0 0 0 8px rgba(0,240,168,0)}}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,9vw,8rem);font-weight:700;line-height:1.0;letter-spacing:-.03em;margin-bottom:24px;animation:fadeUp .7s .08s ease both}
+.hero h1 i{font-style:italic;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{max-width:520px;color:var(--text2);font-size:1rem;line-height:1.75;margin:0 auto 44px;animation:fadeUp .7s .16s ease both}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:64px;animation:fadeUp .7s .24s ease both}
+.hbtn{padding:15px 32px;border-radius:12px;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;border:none;cursor:pointer;transition:all .25s}
+.hbtn-p{background:linear-gradient(135deg,var(--accent),#00d490);color:#07070d;box-shadow:0 8px 30px rgba(0,240,168,.3)}
+.hbtn-p:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,240,168,.5)}
+.hbtn-s{background:var(--card);color:var(--text);border:1px solid var(--border2)}
+.hbtn-s:hover{border-color:var(--accent2);color:var(--accent2)}
+.stats-row{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;animation:fadeUp .7s .32s ease both}
+.snum{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:500;color:var(--text);display:block}
+.snum b{color:var(--accent)}
+.slbl{font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.fcard{position:absolute;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;pointer-events:none;backdrop-filter:blur(12px)}
+.fcard1{top:20%;left:3%;animation:fc1 7s ease-in-out infinite}
+.fcard2{top:30%;right:2%;animation:fc2 8s ease-in-out infinite}
+.fcard3{bottom:22%;left:5%;animation:fc1 9s 1s ease-in-out infinite}
+.fcard4{bottom:30%;right:3%;animation:fc2 6s .5s ease-in-out infinite}
+@keyframes fc1{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes fc2{0%,100%{transform:translateY(-8px)}50%{transform:translateY(8px)}}
+.fcard-ico{font-size:22px}
+.fcard-txt strong{font-size:.8rem;display:block;margin-bottom:2px}
+.fcard-txt small{font-size:.7rem;color:var(--text3)}
+.ticker-band{overflow:hidden;background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;position:relative;z-index:1}
+.ticker-inner{display:flex;white-space:nowrap;animation:tick 40s linear infinite}
+.tick-item{display:inline-flex;align-items:center;gap:8px;padding:0 36px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3)}
+.tick-item em{color:var(--accent);font-style:normal}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+section{position:relative;z-index:1}
+.sec-head{text-align:center;margin-bottom:56px}
+.sec-tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-family:'JetBrains Mono',monospace}
+.sec-head h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4.5vw,3.8rem);font-weight:700;line-height:1.08;margin-bottom:16px;letter-spacing:-.02em}
+.sec-head h2 i{font-style:italic;color:var(--accent2)}
+.sec-head p{color:var(--text2);font-size:.95rem;max-width:500px;margin:0 auto;line-height:1.75}
+/* CHARITIES */
+.charities{padding:110px 5%}
+.search-wrap{max-width:640px;margin:0 auto 48px}
+.sbar{display:flex;align-items:center;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:5px 5px 5px 18px;gap:10px;transition:border-color .2s}
+.sbar:focus-within{border-color:var(--accent)}
+.sbar input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Syne',sans-serif;font-size:.875rem}
+.sbar input::placeholder{color:var(--text3)}
+.sbtn{padding:10px 22px;background:linear-gradient(135deg,var(--accent),#00d490);color:#07070d;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer}
+.filter-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+.chip{padding:7px 18px;border-radius:100px;background:var(--card);border:1px solid var(--border);color:var(--text3);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s}
+.chip:hover,.chip.on{background:rgba(0,240,168,.1);border-color:rgba(0,240,168,.3);color:var(--accent)}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:20px;max-width:1260px;margin:0 auto}
+.cc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:26px;transition:all .3s;position:relative;overflow:hidden}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.cc:hover{transform:translateY(-5px);border-color:rgba(0,240,168,.15);box-shadow:0 24px 60px rgba(0,0,0,.4),var(--glow)}
+.cc:hover::before{transform:scaleX(1)}
+.cc-top{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.cc-logo{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.cc-info h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
+.cc-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:100px;font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.cc-desc{font-size:.82rem;color:var(--text2);line-height:1.65;margin-bottom:18px}
+.cc-nums{display:flex;gap:16px;margin-bottom:18px}
+.cn-v{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)}
+.cn-l{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.cc-bar-wrap{margin-bottom:18px}
+.cc-bar-hd{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text2);margin-bottom:5px}
+.cc-bar{height:4px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.cc-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width 1.8s ease}
+.donate-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:10px;background:rgba(0,240,168,.08);border:1px solid rgba(0,240,168,.2);color:var(--accent);font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+.donate-btn:hover{background:var(--accent);color:#07070d;border-color:var(--accent)}
+/* CHARITY CENTERS */
+.centers{padding:100px 5%;background:linear-gradient(180deg,transparent,var(--bg2) 15%,var(--bg2) 85%,transparent)}
+.centers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1260px;margin:0 auto}
+/* MAP PREMIUM */
+.map-outer{max-width:1260px;margin:0 auto 60px;display:grid;grid-template-columns:1fr 300px;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--border2);min-height:460px}
+.map-wrap{position:relative;overflow:hidden;background:#060d18;min-height:460px}
+.map-svg{width:100%;height:auto;display:block}
+@keyframes mapPulse{0%,100%{opacity:.18;transform:scale(1)}50%{opacity:.38;transform:scale(1.35)}}
+.map-tt{position:absolute;background:rgba(7,7,20,.97);border:1px solid rgba(0,240,168,.2);border-radius:14px;padding:14px 16px;font-size:.78rem;pointer-events:none;opacity:0;transition:opacity .18s;z-index:20;max-width:230px;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.map-tt.show{opacity:1}
+.map-tt-name{font-size:.86rem;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.3}
+.map-tt-loc{font-size:.68rem;color:var(--text3);margin-bottom:7px;font-family:'JetBrains Mono',monospace}
+.map-tt-tag{display:inline-block;font-size:.6rem;font-weight:700;padding:2px 9px;border-radius:100px;margin-bottom:7px;text-transform:uppercase;letter-spacing:.07em}
+.map-tt-note{font-size:.71rem;color:var(--text2);line-height:1.6}
+.map-tt-stat{display:flex;gap:12px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.map-tt-sv{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:500;color:var(--accent)}
+.map-tt-sl{font-size:.6rem;color:var(--text3)}
+.map-side{background:var(--card2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;height:460px}
+.map-side-hd{padding:18px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.map-side-title{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:2px}
+.map-side-count{font-size:1.5rem;font-weight:700;color:var(--accent);font-family:'Cormorant Garamond',serif}
+.map-list{flex:1;overflow-y:auto;padding:8px 0}
+.map-list::-webkit-scrollbar{width:3px}
+.map-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.map-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;transition:background .15s;border-left:2px solid transparent}
+.map-item:hover,.map-item.active{background:rgba(0,240,168,.04);border-left-color:var(--accent)}.map-item{cursor:pointer}
+.map-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.map-item-name{font-size:.73rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+.map-item-loc{font-size:.62rem;color:var(--text3)}
+.map-legend{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.map-leg{display:flex;align-items:center;gap:6px;font-size:.62rem;color:var(--text3);margin-bottom:5px}
+.map-leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cen-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .3s}
+.cen-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.cen-img{height:140px;display:flex;align-items:center;justify-content:center;font-size:50px}
+.cen-body{padding:18px 20px 20px}
+.cen-country{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+.cen-body h4{font-size:.95rem;font-weight:700;margin-bottom:6px;line-height:1.3}
+.cen-body p{font-size:.78rem;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.cen-tag{display:inline-block;padding:3px 10px;border-radius:100px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.cen-stats-row{display:flex;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.cen-st{text-align:center;flex:1}
+.cen-st-v{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:500;color:var(--text)}
+.cen-st-l{font-size:.6rem;color:var(--text3);text-transform:uppercase}
+/* IMPACT */
+.impact{padding:100px 5%}
+.impact-bigrow{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;max-width:1200px;margin:0 auto 18px}
+.impact-row2{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;max-width:1200px;margin:0 auto}
+.ic{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;transition:all .3s}
+.ic:hover{border-color:rgba(0,240,168,.15);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.ic.big{display:flex;align-items:center;gap:36px}
+.ic-ico{font-size:40px;flex-shrink:0;margin-bottom:12px}
+.ic.big .ic-ico{font-size:56px;margin-bottom:0}
+.ic-num{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:700;color:var(--accent);line-height:1;margin-bottom:4px}
+.ic h3{font-size:.95rem;font-weight:700;margin-bottom:6px}
+.ic p{font-size:.78rem;color:var(--text2);line-height:1.65}
+.ic-sm .ic-num{font-size:1.8rem;color:var(--gold)}
+/* CAUSES */
+.causes{padding:80px 5% 110px}
+.cause-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:50px;flex-wrap:wrap}
+.ctab{padding:9px 20px;border-radius:100px;background:var(--card);border:1px solid var(--border);color:var(--text2);font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+.ctab:hover,.ctab.on{background:rgba(0,240,168,.1);border-color:rgba(0,240,168,.3);color:var(--accent)}
+.cause-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;max-width:1260px;margin:0 auto}
+.cau-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .3s}
+.cau-c:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.35)}
+.cau-img{height:150px;display:flex;align-items:center;justify-content:center;font-size:52px}
+.cau-body{padding:18px}
+.cau-body h4{font-weight:700;margin-bottom:5px;font-size:.95rem}
+.cau-body p{font-size:.78rem;color:var(--text2);line-height:1.6;margin-bottom:12px}
+.cau-raised{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);margin-bottom:10px}
+.cau-mini-bar{height:3px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.cau-mini-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(14px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-bg.show{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;width:100%;max-width:500px;padding:44px;position:relative;transform:scale(.92) translateY(16px);transition:all .3s;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.modal-bg.show .modal{transform:scale(1) translateY(0)}
+.mclose{position:absolute;top:18px;right:18px;width:34px;height:34px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mclose:hover{border-color:var(--accent3);color:var(--accent3)}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;margin-bottom:4px}
+.modal-sub{color:var(--text2);font-size:.85rem;margin-bottom:28px}
+.mtabs{display:flex;gap:6px;margin-bottom:26px;background:var(--bg3);padding:4px;border-radius:10px}
+.mtab{flex:1;padding:9px;border-radius:7px;background:transparent;border:none;color:var(--text2);font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+.mtab.on{background:var(--card2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.soc-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+.soc-btn:hover{border-color:var(--accent2);background:var(--card2);transform:translateY(-1px)}
+.soc-btn svg{width:16px;height:16px;flex-shrink:0}
+.soc-btn.full{grid-column:1/-1}
+.divvy{display:flex;align-items:center;gap:10px;margin:16px 0}
+.divvy::before,.divvy::after{content:'';flex:1;height:1px;background:var(--border)}
+.divvy span{font-size:.72rem;color:var(--text3)}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--text2);margin-bottom:5px;text-transform:uppercase}
+.fi{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Syne',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s,box-shadow .2s}
+.fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,240,168,.1)}
+.fi::placeholder{color:var(--text3)}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sub-btn{width:100%;margin-top:8px;padding:13px;background:linear-gradient(135deg,var(--accent),#00d490);border:none;border-radius:10px;color:#07070d;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(0,240,168,.3)}
+.sub-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,240,168,.45)}
+.mfooter{text-align:center;font-size:.72rem;color:var(--text3);margin-top:14px}
+.mfooter a{color:var(--accent);text-decoration:none}
+/* DONATE MODAL */
+.donate-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(16px);z-index:5001;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
+.donate-modal-bg.show{opacity:1;pointer-events:all}
+.dmodal{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;width:100%;max-width:480px;padding:40px;position:relative;transform:scale(.92);transition:all .3s;box-shadow:0 40px 80px rgba(0,0,0,.7);margin:auto}
+.donate-modal-bg.show .dmodal{transform:scale(1)}
+.amount-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.amt-btn{padding:12px 8px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;text-align:center}
+.amt-btn:hover,.amt-btn.on{background:rgba(0,240,168,.1);border-color:rgba(0,240,168,.35);color:var(--accent)}
+.card-preview{background:linear-gradient(135deg,#1e1e3a,#2d1f5e);border-radius:16px;padding:24px;margin:20px 0;position:relative;overflow:hidden;border:1px solid rgba(139,92,246,.3);min-height:160px}
+.card-preview::before{content:'';position:absolute;top:-30px;right:-30px;width:150px;height:150px;background:radial-gradient(circle,rgba(139,92,246,.3),transparent 70%)}
+.card-chip{width:38px;height:28px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:5px;margin-bottom:20px;box-shadow:0 2px 8px rgba(251,191,36,.3)}
+.card-num{font-family:'JetBrains Mono',monospace;font-size:1.05rem;letter-spacing:.15em;color:rgba(255,255,255,.9);margin-bottom:16px}
+.card-bottom{display:flex;justify-content:space-between;align-items:flex-end}
+.card-name{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.7)}
+.card-expiry-label{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:2px}
+.card-expiry-val{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:rgba(255,255,255,.8)}
+.visa-logo{position:absolute;bottom:20px;right:20px;font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;font-style:italic;color:white}
+.payment-icons{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.pay-icon{display:flex;align-items:center;gap:5px;padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.72rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s}
+.pay-icon:hover{border-color:rgba(0,240,168,.3);color:var(--accent)}
+.pay-icon.on{border-color:rgba(0,240,168,.4);color:var(--accent);background:rgba(0,240,168,.06)}
+.secure-badges{display:flex;gap:14px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.s-badge{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text3)}
+.s-badge em{color:var(--accent);font-style:normal}
+/* REGIONS */
+.worldmap-sec{padding:80px 5%;background:var(--bg2)}
+.world-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1200px;margin:0 auto;align-items:start}
+.regions-list{display:flex;flex-direction:column;gap:12px}
+.region-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px;transition:all .3s;cursor:pointer}
+.region-item:hover{border-color:rgba(0,240,168,.2);transform:translateX(4px)}.region-item{cursor:pointer}
+.reg-flag{font-size:28px;flex-shrink:0}
+.reg-info{flex:1}
+.reg-info h5{font-size:.9rem;font-weight:700;margin-bottom:3px}
+.reg-info span{font-size:.72rem;color:var(--text3)}
+.reg-count{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--accent);font-weight:500}
+.map-visual{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;text-align:center}
+.map-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px}
+.map-stat{background:var(--bg3);border-radius:10px;padding:14px;text-align:center}
+.map-stat-v{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--accent);display:block}
+.map-stat-l{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+/* TESTIMONIALS */
+.testis{padding:100px 5%}
+.testis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;max-width:1200px;margin:0 auto}
+.tcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;transition:all .3s}
+.tcard:hover{border-color:rgba(0,240,168,.15);box-shadow:var(--glow)}
+.tq{font-size:1.8rem;color:var(--accent);line-height:1;margin-bottom:14px;opacity:.6}
+.ttext{color:var(--text2);font-size:.875rem;line-height:1.75;margin-bottom:22px;font-style:italic}
+.tauthor{display:flex;align-items:center;gap:10px}
+.tavatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+.tname{font-size:.85rem;font-weight:700}
+.trole{font-size:.7rem;color:var(--text3)}
+/* CTA */
+.cta-sec{padding:120px 5%;text-align:center;position:relative;overflow:hidden}
+.cta-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 900px 500px at 50% 50%,rgba(0,240,168,.05),transparent 70%);pointer-events:none}
+.cta-sec h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:700;line-height:1.05;margin-bottom:20px;letter-spacing:-.03em}
+.cta-sec h2 i{font-style:italic;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-sec p{color:var(--text2);max-width:460px;margin:0 auto 40px;line-height:1.75}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 36px}
+.fg-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:44px;max-width:1200px;margin:0 auto 44px}
+.fb-brand p{color:var(--text2);font-size:.8rem;line-height:1.75;margin:14px 0;max-width:260px}
+.fsocials{display:flex;gap:8px}
+.fsoc{width:36px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text2)}
+.fsoc:hover{border-color:var(--accent);color:var(--accent)}
+.fc h5{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:14px}
+.fc ul{list-style:none}
+.fc ul li{margin-bottom:9px}
+.fc ul li a{color:var(--text3);font-size:.8rem;text-decoration:none;transition:color .2s}
+.fc ul li a:hover{color:var(--accent)}
+.fbot{max-width:1200px;margin:0 auto;padding-top:28px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.fbot p{color:var(--text3);font-size:.75rem}
+.trust-badges{display:flex;gap:8px;align-items:center}
+.tb{padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:.65rem;font-weight:600;color:var(--text3);letter-spacing:.05em}
+.sf{opacity:0;transform:translateY(36px);transition:all .7s ease}
+.sf.vis{opacity:1;transform:translateY(0)}
+.sf2{opacity:0;transform:translateY(36px);transition:all .7s .12s ease}
+.sf2.vis{opacity:1;transform:translateY(0)}
+.sf3{opacity:0;transform:translateY(36px);transition:all .7s .24s ease}
+.sf3.vis{opacity:1;transform:translateY(0)}
+@media(max-width:900px){
+  .nav-links{display:none}
+  .fcard1,.fcard2,.fcard3,.fcard4{display:none}
+  .impact-bigrow{grid-template-columns:1fr}
+  .impact-row2{grid-template-columns:1fr 1fr}
+  .fg-grid{grid-template-columns:1fr 1fr}
+  .world-grid{grid-template-columns:1fr}
+}
+
+/* LEAFLET POPUP CUSTOM */
+.gw-popup .leaflet-popup-content-wrapper{background:#0d0d18;border:1px solid rgba(0,240,168,.2);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.7);padding:0}
+.gw-popup .leaflet-popup-content{margin:14px 16px;color:#eeedf8}
+.gw-popup .leaflet-popup-tip-container{display:none}
+.gw-popup .leaflet-popup-close-button{color:#8886a8;font-size:18px;top:8px;right:10px}
+.gw-popup .leaflet-popup-close-button:hover{color:#fff}
+[data-theme="light"] .gw-popup .leaflet-popup-content-wrapper{background:#fff;border:1px solid rgba(0,0,0,.12)}
+[data-theme="light"] .gw-popup .leaflet-popup-content{color:#111}
+.leaflet-control-zoom{border:1px solid rgba(255,255,255,.1)!important;background:rgba(13,13,24,.9)!important;border-radius:8px!important}
+.leaflet-control-zoom a{background:transparent!important;color:#eeedf8!important;border:none!important;border-bottom:1px solid rgba(255,255,255,.06)!important}
+.leaflet-control-zoom a:hover{background:rgba(0,240,168,.1)!important;color:#00f0a8!important}
+[data-theme="light"] .leaflet-control-zoom{background:rgba(255,255,255,.95)!important}
+[data-theme="light"] .leaflet-control-zoom a{color:#111!important}
+
+/* LANGUAGE DROPDOWN */
+.lang-wrap{position:relative}
+.lang-btn{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.lang-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:6px;min-width:150px;z-index:200;display:none;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.lang-menu.open{display:block}
+.lang-opt{padding:9px 14px;border-radius:8px;font-size:.8rem;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap}
+.lang-opt:hover{background:rgba(0,240,168,.08);color:var(--accent)}
+/* IMPROVED GLOBAL REGIONS MAP */
+.worldmap-sec{padding:100px 5%}
+.world-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1260px;margin:0 auto;align-items:start}
+.regions-list{display:flex;flex-direction:column;gap:10px}
+.region-item{display:flex;align-items:center;gap:16px;padding:18px 20px;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:all .25s;cursor:pointer}
+.region-item:hover{border-color:rgba(0,240,168,.2);transform:translateX(4px)}.region-item{cursor:pointer}
+.reg-flag{font-size:1.8rem;flex-shrink:0}
+.reg-info{flex:1}
+.reg-info h5{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.reg-info span{font-size:.72rem;color:var(--text3)}
+.reg-count{font-family:"JetBrains Mono",monospace;font-size:1.1rem;font-weight:500;color:var(--accent)}
+/* GLOBAL MAP VISUAL — now a real Leaflet map */
+.global-map-container{border-radius:20px;overflow:hidden;border:1px solid var(--border2);position:relative}
+.global-map-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.gm-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.gm-stat-v{font-family:"JetBrains Mono",monospace;font-size:1.3rem;font-weight:500;color:var(--accent)}
+.gm-stat-l{font-size:.65rem;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+@media(max-width:900px){
+  .world-grid{grid-template-columns:1fr}
+  .map-outer{grid-template-columns:1fr}
+  .map-side{height:auto;max-height:280px}
+}
+
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<nav>
+  <a href="#" class="nav-logo"><div class="logo-mark">🌍</div>Give<em>World</em></a>
+  <ul class="nav-links">
+    <li><a href="#charities" data-i18n="nav_charities">Charities</a></li>
+    <li><a href="#centers" data-i18n="nav_centers">Centers</a></li>
+    <li><a href="#causes" data-i18n="nav_causes">Causes</a></li>
+    <li><a href="#regions" data-i18n="nav_global">Global</a></li>
+  </ul>
+  <div class="nav-end">
+    <div class="lang-wrap" id="langWrap">
+      <button class="nbtn nbtn-ghost lang-btn" onclick="toggleLangMenu()" id="langBtn">🌐 EN</button>
+      <div class="lang-menu" id="langMenu">
+        <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
+        <div class="lang-opt" onclick="setLang('ru')">🇷🇺 Русский</div>
+        <div class="lang-opt" onclick="setLang('uz')">🇺🇿 O'zbek</div>
+        <div class="lang-opt" onclick="setLang('fr')">🇫🇷 Français</div>
+        <div class="lang-opt" onclick="setLang('ar')">🇸🇦 العربية</div>
+      </div>
+    </div>
+    <button class="nbtn nbtn-ghost" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    <button class="nbtn nbtn-ghost" id="signInBtn" onclick="openAuth('login')" data-i18n="nav_signin">Sign In</button>
+    <div id="userArea" style="display:none;align-items:center;gap:8px">
+      <div style="padding:6px 14px;background:rgba(0,240,168,.1);border:1px solid rgba(0,240,168,.25);border-radius:8px;font-size:.8rem;font-weight:700;color:var(--accent)">👤 <span id="userLabel"></span></div>
+      <button class="nbtn nbtn-ghost" onclick="doLogout()" style="font-size:.78rem">Выйти</button>
+    </div>
+    <button class="nbtn nbtn-solid" id="donateBtn2" onclick="openDonate()" data-i18n="nav_donate">💳 Donate Now</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow"><div class="pulse-dot"></div> <span data-i18n="hero_eyebrow">Trusted by 12M+ donors in 190 countries</span></div>
+  <h1><span data-i18n="hero_h1a">Make the World</span><br><i data-i18n="hero_h1b">Better Together</i></h1>
+  <p class="hero-desc" data-i18n="hero_desc">One platform uniting every major charitable organisation on Earth. Find your cause, give with confidence, track your impact in real time.</p>
+  <div class="hero-btns">
+    <button class="hbtn hbtn-p" onclick="openDonate()" data-i18n="hero_btn_donate">💳 Donate with Card</button>
+    <button class="hbtn hbtn-s" onclick="document.getElementById('charities').scrollIntoView({behavior:'smooth'})" data-i18n="hero_btn_browse">Browse Charities →</button>
+  </div>
+  <div class="stats-row">
+    <div><span class="snum">$4.2<b>B</b></span><div class="slbl" data-i18n="stat_raised">Total raised</div></div>
+    <div><span class="snum">8,400<b>+</b></span><div class="slbl" data-i18n="stat_charities">Charities</div></div>
+    <div><span class="snum">190<b>+</b></span><div class="slbl" data-i18n="stat_countries">Countries</div></div>
+    <div><span class="snum">40M<b>+</b></span><div class="slbl" data-i18n="stat_lives_changed">Lives changed</div></div>
+  </div>
+  <div class="fcard fcard1"><div class="fcard-ico">💝</div><div class="fcard-txt"><strong>$2,480 donated</strong><small>Orphan children • 1m ago</small></div></div>
+  <div class="fcard fcard2"><div class="fcard-ico">♿</div><div class="fcard-txt"><strong>Wheelchair delivered</strong><small>DisabilityFirst • just now</small></div></div>
+  <div class="fcard fcard3"><div class="fcard-ico">🏡</div><div class="fcard-txt"><strong>Care home funded</strong><small>HelpAge • 4m ago</small></div></div>
+  <div class="fcard fcard4"><div class="fcard-ico">💊</div><div class="fcard-txt"><strong>Medicines shipped</strong><small>MSF • 7m ago</small></div></div>
+</section>
+
+<div class="ticker-band">
+  <div class="ticker-inner">
+    <span class="tick-item">◆ Red Cross <em>$8.2M raised</em> 2024</span><span class="tick-item">◆ UNICEF helped <em>45M children</em></span><span class="tick-item">◆ WHO vaccines to <em>120 nations</em></span><span class="tick-item">◆ MSF treated <em>1.2M patients</em></span><span class="tick-item">◆ Habitat built <em>150,000 homes</em></span><span class="tick-item">◆ WWF protected <em>1.2B acres</em></span><span class="tick-item">◆ Save the Children <em>60M families</em></span><span class="tick-item">◆ Oxfam fed <em>48M people</em></span><span class="tick-item">◆ WFP <em>4.2M tons of food</em></span><span class="tick-item">◆ UNHCR sheltered <em>26M refugees</em></span>
+    <span class="tick-item">◆ Red Cross <em>$8.2M raised</em> 2024</span><span class="tick-item">◆ UNICEF helped <em>45M children</em></span><span class="tick-item">◆ WHO vaccines to <em>120 nations</em></span><span class="tick-item">◆ MSF treated <em>1.2M patients</em></span><span class="tick-item">◆ Habitat built <em>150,000 homes</em></span><span class="tick-item">◆ WWF protected <em>1.2B acres</em></span><span class="tick-item">◆ Save the Children <em>60M families</em></span><span class="tick-item">◆ Oxfam fed <em>48M people</em></span><span class="tick-item">◆ WFP <em>4.2M tons of food</em></span><span class="tick-item">◆ UNHCR sheltered <em>26M refugees</em></span>
+  </div>
+</div>
+
+<!-- CHARITIES -->
+<section class="charities" id="charities">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="ch_tag">// Global Organisations</div><h2><span data-i18n="ch_h2a">World's Most Trusted</span><br><i data-i18n="ch_h2b">Charities</i></h2><p data-i18n="ch_desc">Every major charitable organisation, verified and vetted, on one platform.</p></div>
+  <div class="search-wrap sf2"><div class="sbar"><span>🔍</span><input type="text" placeholder="Search charities, causes, or countries..." data-i18n-ph="search_ph"><button class="sbtn" data-i18n="search_btn">Search</button></div></div>
+  <div class="filter-chips sf3"><button class="chip on" data-filter="all" data-i18n="f_all">All</button><button class="chip" data-filter="elderly" data-i18n="f_elderly">👴 Elderly</button><button class="chip" data-filter="disability" data-i18n="f_disability">♿ Disability</button><button class="chip" data-filter="children" data-i18n="f_children">👶 Children</button><button class="chip" data-filter="hunger" data-i18n="f_hunger">🍽️ Hunger</button><button class="chip" data-filter="water" data-i18n="f_water">💧 Water</button><button class="chip" data-filter="health" data-i18n="f_health">🏥 Health</button><button class="chip" data-filter="environment" data-i18n="f_env">🌿 Environment</button></div>
+  <div class="ch-grid">
+    <div class="cc sf" data-cat="health"><div class="cc-top"><div class="cc-logo" style="background:rgba(220,38,38,.12)">🏥</div><div class="cc-info"><h4>International Red Cross</h4><span class="cc-badge" style="background:rgba(220,38,38,.1);color:#f87171">🚨 Emergency Aid</span></div></div><p class="cc-desc">Providing emergency assistance, disaster relief and education across 192 nations. The world's largest humanitarian network with 17M volunteers globally.</p><div class="cc-nums"><div><div class="cn-v">192</div><div class="cn-l">Countries</div></div><div><div class="cn-v">$8.2B</div><div class="cn-l">Raised</div></div><div><div class="cn-v">97M</div><div class="cn-l">Helped</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>2024 Campaign</span><span style="color:var(--accent)">82%</span></div><div class="cc-bar"><div class="cc-fill" style="width:82%"></div></div></div><button class="donate-btn" onclick="openDonate('Red Cross')">Donate Now ❤️</button></div>
+    <div class="cc sf2" data-cat="children"><div class="cc-top"><div class="cc-logo" style="background:rgba(59,130,246,.12)">👶</div><div class="cc-info"><h4>UNICEF</h4><span class="cc-badge" style="background:rgba(59,130,246,.1);color:#60a5fa">🌐 Children</span></div></div><p class="cc-desc">Working in 190+ countries to save children's lives and defend their rights. Vaccines, nutrition, education — UNICEF reaches every child everywhere.</p><div class="cc-nums"><div><div class="cn-v">190+</div><div class="cn-l">Nations</div></div><div><div class="cn-v">45M</div><div class="cn-l">Kids helped</div></div><div><div class="cn-v">$5.1B</div><div class="cn-l">Budget</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Nutrition Goal</span><span style="color:var(--accent)">74%</span></div><div class="cc-bar"><div class="cc-fill" style="width:74%"></div></div></div><button class="donate-btn" onclick="openDonate('UNICEF')">Donate Now 💙</button></div>
+    <div class="cc sf3" data-cat="elderly"><div class="cc-top"><div class="cc-logo" style="background:rgba(251,191,36,.12)">👴</div><div class="cc-info"><h4>HelpAge International</h4><span class="cc-badge" style="background:rgba(251,191,36,.1);color:#fbbf24">🏠 Elderly</span></div></div><p class="cc-desc">Championing rights of older people in 80+ countries. Care homes, healthcare and social inclusion for the aged and forgotten around the world.</p><div class="cc-nums"><div><div class="cn-v">80+</div><div class="cn-l">Countries</div></div><div><div class="cn-v">3.2M</div><div class="cn-l">Seniors</div></div><div><div class="cn-v">1,200</div><div class="cn-l">Care homes</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Care Homes Goal</span><span style="color:var(--accent)">61%</span></div><div class="cc-bar"><div class="cc-fill" style="width:61%"></div></div></div><button class="donate-btn" onclick="openDonate('HelpAge')">Donate Now 🌟</button></div>
+    <div class="cc sf" data-cat="disability"><div class="cc-top"><div class="cc-logo" style="background:rgba(139,92,246,.12)">♿</div><div class="cc-info"><h4>Disability Rights International</h4><span class="cc-badge" style="background:rgba(139,92,246,.1);color:#a78bfa">♿ Disability</span></div></div><p class="cc-desc">Advocating dignity for people with disabilities — assistive technology, legal support and community integration across 65 countries.</p><div class="cc-nums"><div><div class="cn-v">65</div><div class="cn-l">Countries</div></div><div><div class="cn-v">2.8M</div><div class="cn-l">Supported</div></div><div><div class="cn-v">14K</div><div class="cn-l">Devices</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Tech Access Goal</span><span style="color:var(--accent)">55%</span></div><div class="cc-bar"><div class="cc-fill" style="width:55%"></div></div></div><button class="donate-btn" onclick="openDonate('DRI')">Donate Now 💜</button></div>
+    <div class="cc sf2" data-cat="hunger"><div class="cc-top"><div class="cc-logo" style="background:rgba(0,240,168,.1)">🌍</div><div class="cc-info"><h4>Oxfam International</h4><span class="cc-badge" style="background:rgba(0,240,168,.08);color:var(--accent)">🍽️ Poverty</span></div></div><p class="cc-desc">Fighting poverty and injustice in 90+ countries. Emergency relief, development and advocacy — empowering communities to lift themselves from poverty.</p><div class="cc-nums"><div><div class="cn-v">90+</div><div class="cn-l">Countries</div></div><div><div class="cn-v">48M</div><div class="cn-l">People fed</div></div><div><div class="cn-v">$2.7B</div><div class="cn-l">Invested</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Food Security</span><span style="color:var(--accent)">90%</span></div><div class="cc-bar"><div class="cc-fill" style="width:90%"></div></div></div><button class="donate-btn" onclick="openDonate('Oxfam')">Donate Now 🌿</button></div>
+    <div class="cc sf3" data-cat="health"><div class="cc-top"><div class="cc-logo" style="background:rgba(244,63,94,.1)">🩺</div><div class="cc-info"><h4>Médecins Sans Frontières</h4><span class="cc-badge" style="background:rgba(244,63,94,.08);color:#fb7185">🏥 Medical</span></div></div><p class="cc-desc">Doctors Without Borders — delivering medical care in conflict zones, epidemics and disasters across 70+ countries worldwide.</p><div class="cc-nums"><div><div class="cn-v">70+</div><div class="cn-l">Nations</div></div><div><div class="cn-v">1.2M</div><div class="cn-l">Treated</div></div><div><div class="cn-v">$2.1B</div><div class="cn-l">Budget</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Emergency Goal</span><span style="color:var(--accent)">78%</span></div><div class="cc-bar"><div class="cc-fill" style="width:78%"></div></div></div><button class="donate-btn" onclick="openDonate('MSF')">Donate Now 🩺</button></div>
+    <div class="cc sf" data-cat="shelter"><div class="cc-top"><div class="cc-logo" style="background:rgba(251,191,36,.1)">🏠</div><div class="cc-info"><h4>Habitat for Humanity</h4><span class="cc-badge" style="background:rgba(251,191,36,.08);color:#fbbf24">🏡 Shelter</span></div></div><p class="cc-desc">Building homes and hope since 1976. Partnering with families for safe, affordable housing in 70+ countries around the globe.</p><div class="cc-nums"><div><div class="cn-v">70+</div><div class="cn-l">Countries</div></div><div><div class="cn-v">150K</div><div class="cn-l">Homes</div></div><div><div class="cn-v">700K</div><div class="cn-l">Families</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Build Goal 2024</span><span style="color:var(--accent)">68%</span></div><div class="cc-bar"><div class="cc-fill" style="width:68%"></div></div></div><button class="donate-btn" onclick="openDonate('Habitat')">Donate Now 🏗️</button></div>
+    <div class="cc sf2" data-cat="environment"><div class="cc-top"><div class="cc-logo" style="background:rgba(0,240,168,.08)">🐼</div><div class="cc-info"><h4>World Wildlife Fund</h4><span class="cc-badge" style="background:rgba(0,240,168,.06);color:var(--accent)">🌿 Environment</span></div></div><p class="cc-desc">Protecting the natural world and fighting climate change across 100+ countries — conserving life on Earth for future generations.</p><div class="cc-nums"><div><div class="cn-v">100+</div><div class="cn-l">Countries</div></div><div><div class="cn-v">1.2B</div><div class="cn-l">Acres saved</div></div><div><div class="cn-v">5,000+</div><div class="cn-l">Projects</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Forest Protection</span><span style="color:var(--accent)">71%</span></div><div class="cc-bar"><div class="cc-fill" style="width:71%"></div></div></div><button class="donate-btn" onclick="openDonate('WWF')">Donate Now 🐼</button></div>
+    <div class="cc sf3" data-cat="health"><div class="cc-top"><div class="cc-logo" style="background:rgba(59,130,246,.1)">🕊️</div><div class="cc-info"><h4>UNHCR – Refugees</h4><span class="cc-badge" style="background:rgba(59,130,246,.08);color:#60a5fa">🕊️ Refugees</span></div></div><p class="cc-desc">The UN Refugee Agency protecting 26M+ displaced people worldwide — shelter, legal protection and pathways to rebuild lives after conflict.</p><div class="cc-nums"><div><div class="cn-v">135</div><div class="cn-l">Nations</div></div><div><div class="cn-v">26M</div><div class="cn-l">Refugees</div></div><div><div class="cn-v">$4.8B</div><div class="cn-l">Budget</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Shelter Goal</span><span style="color:var(--accent)">63%</span></div><div class="cc-bar"><div class="cc-fill" style="width:63%"></div></div></div><button class="donate-btn" onclick="openDonate('UNHCR')">Donate Now 🕊️</button></div>
+  </div>
+</section>
+
+<!-- CHARITY CENTERS -->
+<section class="centers" id="centers">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="cen_tag">// Charity Centers</div><h2><span data-i18n="cen_h2a">Global</span> <i data-i18n="cen_h2b">Charity Centers</i><br><span data-i18n="cen_h2c">Around the World</span></h2><p data-i18n="cen_desc">Physical charity centers and hubs where your donations create direct, on-the-ground impact every single day.</p></div>
+
+  <!-- LEAFLET MAP -->
+  <div class="map-outer sf" id="mapOuter">
+    <div class="map-wrap" id="mapWrap">
+      <div id="leafletMap" style="width:100%;height:460px;"></div>
+    </div>
+    <div class="map-side">
+      <div class="map-side-hd">
+        <div class="map-side-title" data-i18n="map_title">// Active Centers</div>
+        <div class="map-side-count"><span data-i18n="map_count">20 Locations</span></div>
+      </div>
+      <div class="map-list" id="mapList"></div>
+      <div class="map-legend">
+        <div class="map-leg"><div class="map-leg-dot" style="background:#ef4444"></div>Emergency / Medical</div>
+        <div class="map-leg"><div class="map-leg-dot" style="background:#3b82f6"></div>UN / International HQ</div>
+        <div class="map-leg"><div class="map-leg-dot" style="background:#00f0a8"></div>Children / Education</div>
+        <div class="map-leg"><div class="map-leg-dot" style="background:#f59e0b"></div>Shelter / Housing</div>
+        <div class="map-leg"><div class="map-leg-dot" style="background:#8b5cf6"></div>Elderly / Disability</div>
+        <div class="map-leg"><div class="map-leg-dot" style="background:#22c55e"></div>Environment</div>
+      </div>
+    </div>
+  </div>  </div>
+
+  <div class="centers-grid">
+    <div class="cen-card sf"><div class="cen-img" style="background:linear-gradient(135deg,#0f1f3a,#1a3050)">🇬🇧</div><div class="cen-body"><div class="cen-country">🇬🇧 London, United Kingdom</div><h4>London Humanitarian Hub</h4><p>Central coordination for 40+ UK charities. Distributing aid, shelters and support for homeless and elderly in Greater London daily.</p><span class="cen-tag" style="background:rgba(59,130,246,.1);color:#60a5fa">🏙️ Urban Aid</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">2,400</div><div class="cen-st-l">People/mo</div></div><div class="cen-st"><div class="cen-st-v">42</div><div class="cen-st-l">Staff</div></div><div class="cen-st"><div class="cen-st-v">1998</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf2"><div class="cen-img" style="background:linear-gradient(135deg,#1f0f0f,#401a1a)">🇸🇾</div><div class="cen-body"><div class="cen-country">🇸🇾 Syria / Jordan Border</div><h4>Hope Refugee Center</h4><p>Emergency shelter and medical care for Syrian refugees. Processing 500+ families weekly with food, legal aid and resettlement support.</p><span class="cen-tag" style="background:rgba(244,63,94,.1);color:#fb7185">🆘 Emergency</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">8,500</div><div class="cen-st-l">Residents</div></div><div class="cen-st"><div class="cen-st-v">180</div><div class="cen-st-l">Staff</div></div><div class="cen-st"><div class="cen-st-v">2015</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf3"><div class="cen-img" style="background:linear-gradient(135deg,#0f1f0f,#1a3020)">🇰🇪</div><div class="cen-body"><div class="cen-country">🇰🇪 Nairobi, Kenya</div><h4>Africa Children's Care Hub</h4><p>Supporting 3,200 orphaned children across East Africa with education, nutrition, healthcare and psychological support under one roof.</p><span class="cen-tag" style="background:rgba(251,191,36,.1);color:#fbbf24">👶 Children</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">3,200</div><div class="cen-st-l">Children</div></div><div class="cen-st"><div class="cen-st-v">95</div><div class="cen-st-l">Teachers</div></div><div class="cen-st"><div class="cen-st-v">2008</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf"><div class="cen-img" style="background:linear-gradient(135deg,#1f1a0f,#3d3010)">🇮🇳</div><div class="cen-body"><div class="cen-country">🇮🇳 Mumbai, India</div><h4>Disability Empowerment Center</h4><p>India's largest disability hub — wheelchair distribution, therapy, vocational training and legal advocacy for 12,000+ disabled individuals yearly.</p><span class="cen-tag" style="background:rgba(139,92,246,.1);color:#a78bfa">♿ Disability</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">12K</div><div class="cen-st-l">Per year</div></div><div class="cen-st"><div class="cen-st-v">230</div><div class="cen-st-l">Staff</div></div><div class="cen-st"><div class="cen-st-v">2001</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf2"><div class="cen-img" style="background:linear-gradient(135deg,#1a1030,#2d1f50)">🇩🇪</div><div class="cen-body"><div class="cen-country">🇩🇪 Berlin, Germany</div><h4>ElderCare Excellence Center</h4><p>A model care facility for 600 seniors with dementia and disabilities. Pioneering compassionate elderly care across central Europe since 1994.</p><span class="cen-tag" style="background:rgba(251,191,36,.1);color:#fbbf24">👴 Senior Care</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">600</div><div class="cen-st-l">Residents</div></div><div class="cen-st"><div class="cen-st-v">140</div><div class="cen-st-l">Carers</div></div><div class="cen-st"><div class="cen-st-v">1994</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf3"><div class="cen-img" style="background:linear-gradient(135deg,#0f1f20,#103030)">🇧🇩</div><div class="cen-body"><div class="cen-country">🇧🇩 Dhaka, Bangladesh</div><h4>Clean Water & Nutrition Hub</h4><p>Delivering safe water and food to 50,000+ people monthly in Dhaka's most vulnerable urban settlements. Fighting hunger and thirst daily.</p><span class="cen-tag" style="background:rgba(0,240,168,.08);color:var(--accent)">💧 Water & Food</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">50K</div><div class="cen-st-l">People/mo</div></div><div class="cen-st"><div class="cen-st-v">60</div><div class="cen-st-l">Staff</div></div><div class="cen-st"><div class="cen-st-v">2012</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf"><div class="cen-img" style="background:linear-gradient(135deg,#200f0f,#3d1515)">🇧🇷</div><div class="cen-body"><div class="cen-country">🇧🇷 São Paulo, Brazil</div><h4>Favela Health & Education Center</h4><p>Free clinics, literacy programs and mental health support for 80,000 residents of São Paulo's favelas since 2003.</p><span class="cen-tag" style="background:rgba(244,63,94,.1);color:#fb7185">🏥 Health & Education</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">80K</div><div class="cen-st-l">Residents</div></div><div class="cen-st"><div class="cen-st-v">320</div><div class="cen-st-l">Volunteers</div></div><div class="cen-st"><div class="cen-st-v">2003</div><div class="cen-st-l">Founded</div></div></div></div></div>
+    <div class="cen-card sf2"><div class="cen-img" style="background:linear-gradient(135deg,#0f1520,#152030)">🇺🇿</div><div class="cen-body"><div class="cen-country">🇺🇿 Tashkent, Uzbekistan</div><h4>Central Asia Care Hub</h4><p>Comprehensive support for elderly, disabled and vulnerable families across Central Asia — a growing center serving the entire region.</p><span class="cen-tag" style="background:rgba(0,240,168,.08);color:var(--accent)">🌐 Regional Hub</span><div class="cen-stats-row"><div class="cen-st"><div class="cen-st-v">15K</div><div class="cen-st-l">Per year</div></div><div class="cen-st"><div class="cen-st-v">85</div><div class="cen-st-l">Staff</div></div><div class="cen-st"><div class="cen-st-v">2018</div><div class="cen-st-l">Founded</div></div></div></div></div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<!-- <section class="impact" id="impact">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="imp_tag">// Proven Impact</div><h2><span data-i18n="imp_h2a">What We've Achieved</span><br><i data-i18n="imp_h2b">Together</i></h2><p data-i18n="imp_desc">Real numbers from real organisations making real differences every single day.</p></div>
+  <div class="impact-bigrow">
+    <div class="ic big sf"><div class="ic-ico">🌐</div><div><div class="ic-num">40M+</div><h3 data-i18n="imp_lives_h">Lives Fundamentally Changed</h3><p>From emergency relief to long-term development, our partner charities have transformed over 40 million lives across every continent — water, healthcare, shelter and education delivered with dignity.</p></div></div>
+    <div class="ic sf2"><div class="ic-ico">💊</div><div class="ic-num">1.8B</div><h3 data-i18n="imp_med_h">Medical Treatments</h3><p>Healthcare delivered to underserved communities through our global health charity network.</p></div>
+    <div class="ic sf3"><div class="ic-ico">📚</div><div class="ic-num">22M</div><h3 data-i18n="imp_school_h">Children in School</h3><p>Schools built, scholarships funded, futures secured for the next generation.</p></div>
+  </div>
+  <div class="impact-row2">
+    <div class="ic ic-sm sf"><div class="ic-ico">💧</div><div class="ic-num">380M</div><h3 data-i18n="imp_water_h">Clean Water</h3><p>Wells dug, pipes laid and filtration installed worldwide.</p></div>
+    <div class="ic ic-sm sf2"><div class="ic-ico">🍽️</div><div class="ic-num">500M</div><h3 data-i18n="imp_meals_h">Meals Served</h3><p>Food aid fighting hunger in crisis zones daily.</p></div>
+    <div class="ic ic-sm sf3"><div class="ic-ico">🏠</div><div class="ic-num">200K</div><h3 data-i18n="imp_homes_h">Homes Built</h3><p>Safe permanent housing for vulnerable families worldwide.</p></div>
+    <div class="ic ic-sm sf"><div class="ic-ico">♿</div><div class="ic-num">850K</div><h3 data-i18n="imp_devices_h">Devices Given</h3><p>Wheelchairs, prosthetics and assistive technology distributed.</p></div>
+  </div>
+</section> -->
+
+<!-- CAUSES -->
+<section class="causes" id="causes">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="cau_tag">// Browse by Cause</div><h2><span data-i18n="cau_h2a">Every Cause</span> <i data-i18n="cau_h2b">Matters</i></h2><p data-i18n="cau_desc">Whether elderly, disabled, children or environment — your cause is here.</p></div>
+  <div class="cause-tabs"><button class="ctab on" data-filter="all" data-i18n="f_all">All</button><button class="ctab" data-filter="elderly" data-i18n="f_elderly">👴 Elderly</button><button class="ctab" data-filter="disability" data-i18n="f_disability">♿ Disability</button><button class="ctab" data-filter="children" data-i18n="f_children">👶 Children</button><button class="ctab" data-filter="hunger" data-i18n="f_hunger">🍽️ Hunger</button><button class="ctab" data-filter="water" data-i18n="f_water">💧 Water</button><button class="ctab" data-filter="environment" data-i18n="f_env">🌿 Planet</button><button class="ctab" data-filter="shelter" data-i18n="f_shelter">🏠 Shelter</button></div>
+  <div class="cause-grid">
+    <div class="cau-c sf" data-cat="elderly"><div class="cau-img" style="background:linear-gradient(135deg,#151528,#1f1a40)">🏡</div><div class="cau-body"><h4>Homes for the Elderly</h4><p>Care homes and day centers for isolated seniors. Warm meals, medical care and dignity for those forgotten by society.</p><div class="cau-raised">$842K of $1.2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
+    <div class="cau-c sf2" data-cat="disability"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f15,#1a3020)">♿</div><div class="cau-body"><h4>Wheelchairs for All</h4><p>Mobility devices, prosthetics and adaptive equipment to disabled people who cannot afford them.</p><div class="cau-raised">$430K of $600K raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:72%"></div></div></div></div>
+    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1f0f0f,#3d1515)">👶</div><div class="cau-body"><h4>Orphan Care & Education</h4><p>Safe homes, schooling and love for orphaned children to grow into their full potential.</p><div class="cau-raised">$2.1M of $3M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
+    <div class="cau-c sf" data-cat="health"><div class="cau-img" style="background:linear-gradient(135deg,#101525,#1a2540)">💊</div><div class="cau-body"><h4>Medicine for the Poor</h4><p>Essential medicines and treatment for people in extreme poverty who cannot access basic healthcare.</p><div class="cau-raised">$1.5M of $2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:75%"></div></div></div></div>
+    <div class="cau-c sf2" data-cat="environment"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f10,#1a3015)">🌱</div><div class="cau-body"><h4>Climate & Reforestation</h4><p>Planting forests and fighting climate change to preserve Earth for generations to come.</p><div class="cau-raised">$980K of $1.5M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:65%"></div></div></div></div>
+    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1a1505,#332b0a)">📚</div><div class="cau-body"><h4>Education Access</h4><p>Quality education for every child regardless of background, geography or economic status.</p><div class="cau-raised">$3.4M of $4M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:85%"></div></div></div></div>
+  </div>
+</section>
+
+<!-- GLOBAL REGIONS -->
+<section class="worldmap-sec" id="regions">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="reg_tag">// Global Reach</div><h2><span data-i18n="reg_h2a">Active in Every</span><br><i data-i18n="reg_h2b">Corner of the World</i></h2><p data-i18n="reg_desc">No community too remote, no person too forgotten.</p></div>
+  <div class="world-grid">
+    <div class="regions-list">
+      <div class="region-item sf"><div class="reg-flag">🌍</div><div class="reg-info"><h5 data-i18n="reg_africa">Africa</h5><span>Sub-Saharan, North, East & West Africa</span></div><div class="reg-count">2,100+</div></div>
+      <div class="region-item sf2"><div class="reg-flag">🌏</div><div class="reg-info"><h5 data-i18n="reg_asia">Asia Pacific</h5><span>South Asia, Southeast Asia, East Asia, Oceania</span></div><div class="reg-count">1,840+</div></div>
+      <div class="region-item sf3"><div class="reg-flag">🌎</div><div class="reg-info"><h5 data-i18n="reg_americas">Americas</h5><span>North, Central and South America</span></div><div class="reg-count">1,650+</div></div>
+      <div class="region-item sf"><div class="reg-flag">🇪🇺</div><div class="reg-info"><h5 data-i18n="reg_europe">Europe</h5><span>Western, Eastern, Northern and Southern Europe</span></div><div class="reg-count">1,420+</div></div>
+      <div class="region-item sf2"><div class="reg-flag">🕌</div><div class="reg-info"><h5 data-i18n="reg_mideast">Middle East</h5><span>Gulf States, Levant, North Africa corridor</span></div><div class="reg-count">980+</div></div>
+      <div class="region-item sf3"><div class="reg-flag">🏔️</div><div class="reg-info"><h5 data-i18n="reg_casia">Central Asia</h5><span>Kazakhstan, Uzbekistan, Kyrgyzstan and beyond</span></div><div class="reg-count">410+</div></div>
+    </div>
+    <div class="sf">
+      <div class="global-map-container">
+        <div id="globalMap" style="height:340px;width:100%"></div>
+      </div>
+      <div class="global-map-stats">
+        <div class="gm-stat"><div class="gm-stat-v">190+</div><div class="gm-stat-l" data-i18n="stat_nations">Nations</div></div>
+        <div class="gm-stat"><div class="gm-stat-v">8,400</div><div class="gm-stat-l" data-i18n="stat_charities">Charities</div></div>
+        <div class="gm-stat"><div class="gm-stat-v">40M</div><div class="gm-stat-l" data-i18n="stat_lives">Lives Changed</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testis">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="tes_tag">// Real Stories</div><h2><span data-i18n="tes_h2a">Voices of</span> <i data-i18n="tes_h2b">Change</i></h2></div>
+  <div class="testis-grid">
+    <div class="tcard sf"><div class="tq">"</div><p class="ttext">GiveWorld made it effortless to find verified charities for elderly care. Monthly impact reports show exactly what my donations accomplish. Completely transparent.</p><div class="tauthor"><div class="tavatar" style="background:rgba(0,240,168,.1)">👩</div><div><div class="tname">Sarah K.</div><div class="trole">Monthly donor · Germany 🇩🇪</div></div></div></div>
+    <div class="tcard sf2"><div class="tq">"</div><p class="ttext">As a person with a disability myself, the support for disability causes here is extraordinary. I tracked a wheelchair reaching someone in India within weeks of my donation.</p><div class="tauthor"><div class="tavatar" style="background:rgba(139,92,246,.1)">👨</div><div><div class="tname">Marcus T.</div><div class="trole">Donor & advocate · USA 🇺🇸</div></div></div></div>
+    <div class="tcard sf3"><div class="tq">"</div><p class="ttext">Completely seamless Visa card payment, instant receipt and real-time tracking. I donated from Tashkent and the orphanage in Kenya received funds within 24 hours.</p><div class="tauthor"><div class="tavatar" style="background:rgba(251,191,36,.1)">👩</div><div><div class="tname">Nilufar M.</div><div class="trole">Philanthropist · Uzbekistan 🇺🇿</div></div></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="sec-tag" data-i18n="cta_tag">// Start Today</div>
+  <h2><span data-i18n="cta_h2a">Every Dollar</span><br><i data-i18n="cta_h2b">Changes a Life</i></h2>
+  <p data-i18n="cta_desc">Join 12 million donors. Give securely with Visa, Mastercard, PayPal or your social account. Takes under 2 minutes.</p>
+  <div class="cta-btns">
+    <button class="hbtn hbtn-p" onclick="openDonate()" data-i18n="cta_btn_donate">💳 Donate with Card Now</button>
+    <button class="hbtn hbtn-s" onclick="openAuth('signup')" data-i18n="cta_btn_signup">Create Free Account</button>
+  </div>
+  <div style="display:flex;gap:16px;justify-content:center;margin-top:28px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text3)"><span style="color:var(--accent)">🔒</span>256-bit SSL</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text3)"><span style="color:var(--accent)">✓</span>PCI DSS compliant</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text3)"><span style="color:var(--accent)">🌍</span>60+ currencies</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text3)"><span style="color:var(--accent)">📋</span>Tax-deductible in 60 countries</div>
+  </div>
+</section>
+
+<footer>
+  <div class="fg-grid">
+    <div class="fb-brand">
+      <a href="#" class="nav-logo" style="font-size:1.2rem"><div class="logo-mark" style="width:30px;height:30px;font-size:14px">🌍</div>Give<em>World</em></a>
+      <p data-i18n="foot_desc">The world's most trusted platform connecting donors with verified charitable organisations creating lasting global impact.</p>
+      <div class="fsocials"><a class="fsoc">𝕏</a><a class="fsoc">✈</a><a class="fsoc">📷</a><a class="fsoc">in</a><a class="fsoc">f</a><a class="fsoc">🎮</a></div>
+    </div>
+    <div class="fc"><h5 data-i18n="foot_platform">Platform</h5><ul><li><a href="#">Browse Charities</a></li><li><a href="#">Charity Centers</a></li><li><a href="#">By Cause</a></li><li><a href="#">By Country</a></li><li><a href="#">Impact Reports</a></li></ul></div>
+    <div class="fc"><h5 data-i18n="foot_company">Company</h5><ul><li><a href="#">About Us</a></li><li><a href="#">Our Mission</a></li><li><a href="#">Press</a></li><li><a href="#">Blog</a></li><li><a href="#">Careers</a></li></ul></div>
+    <div class="fc"><h5 data-i18n="foot_support">Support</h5><ul><li><a href="#">Help Center</a></li><li><a href="#">Contact Us</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Transparency</a></li></ul></div>
+  </div>
+  <div class="fbot">
+    <p>© 2025 GiveWorld Foundation. All rights reserved. Charity #GW-2019-001.</p>
+    <div class="trust-badges"><span class="tb">VISA</span><span class="tb">MASTERCARD</span><span class="tb">SSL SECURE</span><span class="tb">PCI DSS</span></div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-bg" id="authModal">
+  <div class="modal">
+    <button class="mclose" onclick="closeAuth()">✕</button>
+    <h3 id="authTitle">Welcome Back</h3>
+    <p class="modal-sub" id="authSub">Sign in to your GiveWorld account</p>
+    <div class="mtabs"><button class="mtab on" id="tl" onclick="authTab('login')">Sign In</button><button class="mtab" id="ts" onclick="authTab('signup')">Create Account</button></div>
+    <div class="social-grid">
+      <button class="soc-btn"><svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Google</button>
+      <button class="soc-btn"><svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</button>
+      <button class="soc-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>Twitter/X</button>
+      <button class="soc-btn"><svg viewBox="0 0 24 24" fill="#2AABEE"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.483c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.11 14.5l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.46c.537-.194 1.006.131.706.085z"/></svg>Telegram</button>
+      <button class="soc-btn"><svg viewBox="0 0 24 24" fill="#9147FF"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>Twitch</button>
+      <button class="soc-btn"><svg viewBox="0 0 24 24" fill="currentColor" style="color:#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>Instagram</button>
+    </div>
+    <div class="divvy"><span>or with email</span></div>
+    <div id="loginF">
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="loginEmail" type="email" placeholder="you@example.com"></div>
+      <div class="fg"><label class="fl">Пароль</label><input class="fi" id="loginPass" type="password" placeholder="••••••••"></div>
+    </div>
+    <div id="signupF" style="display:none">
+      <div class="fg-row"><div class="fg"><label class="fl">Имя</label><input class="fi" id="signupFN" type="text" placeholder="Иван"></div><div class="fg"><label class="fl">Фамилия</label><input class="fi" id="signupLN" type="text" placeholder="Иванов"></div></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="signupEmail" type="email" placeholder="you@example.com"></div>
+      <div class="fg"><label class="fl">Пароль (мин. 6 символов)</label><input class="fi" id="signupPass" type="password" placeholder="Надёжный пароль"></div>
+    </div>
+    <button class="sub-btn" id="authSubmit">Sign In</button>
+    <div class="mfooter"><a href="#">Forgot password?</a> · <a href="#">Privacy Policy</a></div>
+  </div>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="donate-modal-bg" id="donateModal">
+  <div class="dmodal">
+    <button class="mclose" onclick="closeDonate()">✕</button>
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;margin-bottom:4px">Secure Donation</h3>
+    <p class="modal-sub" style="color:var(--text2);font-size:.85rem;margin-bottom:20px">to <strong id="donateTo" style="color:var(--accent)">GiveWorld</strong></p>
+    <div class="fg"><label class="fl">Choose Amount (USD)</label>
+      <div class="amount-grid">
+        <button class="amt-btn" onclick="selAmt(this,'')">Custom</button>
+      </div>
+    </div>
+    <div class="fg" id="custWrap" style="display:none"><label class="fl">Custom Amount</label><input class="fi" type="number" placeholder="Enter amount in USD" id="custAmt"></div>
+    <div class="fg"><label class="fl">Payment Method</label>
+      <div class="payment-icons">
+        <div class="pay-icon on" onclick="selPay(this,'card')">💳 Visa / Card</div>
+        <div class="pay-icon" onclick="selPay(this,'paypal')">🅿️ PayPal</div>
+        <div class="pay-icon" onclick="selPay(this,'apple')">🍎 Apple Pay</div>
+        <div class="pay-icon" onclick="selPay(this,'crypto')">₿ Crypto</div>
+      </div>
+    </div>
+    <div id="cardPreview" class="card-preview">
+      <div class="card-chip"></div>
+      <div class="card-num" id="prevNum">•••• •••• •••• ••••</div>
+      <div class="card-bottom">
+        <div><div class="card-name" id="prevName">CARDHOLDER NAME</div></div>
+        <div class="card-expiry"><div class="card-expiry-label">Expires</div><div class="card-expiry-val" id="prevExp">MM/YY</div></div>
+      </div>
+      <div class="visa-logo">VISA</div>
+    </div>
+    <div id="cardFields">
+      <div class="fg"><label class="fl">Cardholder Name</label><input class="fi cardholderName" id="cardholderName" type="text" placeholder="  Ergashev Ibrohim" oninput="document.getElementById('prevName').textContent=this.value.toUpperCase()||'CARDHOLDER NAME'"></div>
+      <div class="fg"><label class="fl">Card Number</label><input class="fi cardNumber" id="cardNumber" type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)"></div>
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Expiry</label><input class="fi cardExpiry" id="cardExpiry" type="text" placeholder="MM/YY" maxlength="5" oninput="fmtExp(this)"></div>
+        <div class="fg"><label class="fl">CVV</label><input class="fi cardCvv" id="cardCvv" type="text" placeholder="•••" maxlength="4"></div>
+      </div>
+    </div> 
+    <div class="secure-badges">
+      <div class="s-badge"><em>🔒</em>256-bit SSL</div>
+      <div class="s-badge"><em>✓</em>PCI DSS Level 1</div>
+      <div class="s-badge"><em>🛡️</em>3D Secure</div>
+      <div class="s-badge"><em>🌍</em>60+ currencies</div>
+    </div>
+    <button class="sub-btn" id="donateBtn" onclick="submitDonate()">Donate <span id="amtLabel">$50</span> Securely 🔒</button>
+    <div class="mfooter">100% secure · Tax-deductible · <a href="#">Privacy</a></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:32px;right:32px;background:var(--card);border:1px solid rgba(0,240,168,.35);border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:12px;z-index:9000;transform:translateY(120px);opacity:0;transition:all .4s ease;max-width:320px;box-shadow:0 20px 40px rgba(0,0,0,.4)">
+  <span style="font-size:28px">💚</span>
+  <div><strong style="display:block;margin-bottom:2px;font-size:.9rem">Thank you! Donation received.</strong><small style="color:var(--text2);font-size:.73rem">Your generosity is changing lives. Receipt sent to your email.</small></div>
+</div>
+
+<script>
+// Cursor
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=(mx-5)+'px';cur.style.top=(my-5)+'px'});
+(function anim(){rx+=(mx-rx-19)*.15;ry+=(my-ry-19)*.15;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim)})();
+
+// ===== AUTH SYSTEM (localStorage) =====
+let currentUser = null;
+
+function getUsers(){try{return JSON.parse(localStorage.getItem('gw_users')||'{}')}catch(e){return{}}}
+function saveUsers(u){localStorage.setItem('gw_users',JSON.stringify(u))}
+function saveSession(u){localStorage.setItem('gw_session',JSON.stringify(u))}
+function clearSession(){localStorage.removeItem('gw_session')}
+function loadSession(){try{return JSON.parse(localStorage.getItem('gw_session'))}catch(e){return null}}
+
+function updateNav(){
+  const signInBtn=document.getElementById('signInBtn');
+  const userArea=document.getElementById('userArea');
+  if(currentUser){
+    signInBtn.style.display='none';
+    if(userArea){userArea.style.display='flex';document.getElementById('userLabel').textContent=currentUser.firstName||currentUser.email.split('@')[0];}
+  } else {
+    signInBtn.style.display='';
+    if(userArea)userArea.style.display='none';
+  }
+}
+
+function showAuthMsg(msg,ok){
+  let el=document.getElementById('authMsg');
+  if(!el){el=document.createElement('div');el.id='authMsg';el.style.cssText='border-radius:8px;padding:9px 14px;font-size:.82rem;margin-bottom:12px;text-align:center';document.getElementById('authSubmit').before(el);}
+  el.style.background=ok?'rgba(0,240,168,.1)':'rgba(244,63,94,.1)';
+  el.style.color=ok?'var(--accent)':'#f43f5e';
+  el.style.border=ok?'1px solid rgba(0,240,168,.25)':'1px solid rgba(244,63,94,.25)';
+  el.textContent=msg;
+}
+
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('loginPass').value;
+  if(!email||!pass){showAuthMsg('Заполните все поля');return}
+  const users=getUsers();
+  const user=users[email];
+  if(!user||user.password!==btoa(pass)){showAuthMsg('Неверный email или пароль');return}
+  currentUser=user;saveSession(user);updateNav();closeAuth();
+}
+
+function doSignup(){
+  const fn=document.getElementById('signupFN').value.trim();
+  const ln=document.getElementById('signupLN').value.trim();
+  const email=document.getElementById('signupEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('signupPass').value;
+  if(!fn||!ln||!email||!pass){showAuthMsg('Заполните все поля');return}
+  if(pass.length<6){showAuthMsg('Пароль минимум 6 символов');return}
+  if(!/\S+@\S+\.\S+/.test(email)){showAuthMsg('Введите корректный email');return}
+  const users=getUsers();
+  if(users[email]){showAuthMsg('Этот email уже зарегистрирован');return}
+  const user={email,firstName:fn,lastName:ln,password:btoa(pass),joined:Date.now()};
+  users[email]=user;saveUsers(users);currentUser=user;saveSession(user);updateNav();closeAuth();
+}
+
+function doLogout(){currentUser=null;clearSession();updateNav();}
+
+function openAuth(t){
+  const el=document.getElementById('authMsg');if(el)el.remove();
+  document.getElementById('authModal').classList.add('show');authTab(t||'login');
+}
+function closeAuth(){document.getElementById('authModal').classList.remove('show')}
+document.getElementById('authModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAuth()});
+
+function authTab(t){
+  document.getElementById('tl').classList.toggle('on',t==='login');
+  document.getElementById('ts').classList.toggle('on',t==='signup');
+  document.getElementById('loginF').style.display=t==='login'?'block':'none';
+  document.getElementById('signupF').style.display=t==='signup'?'block':'none';
+  document.getElementById('authTitle').textContent=t==='login'?'Добро пожаловать':'Создать аккаунт';
+  document.getElementById('authSub').textContent=t==='login'?'Войдите в свой аккаунт':'Зарегистрируйтесь бесплатно';
+  document.getElementById('authSubmit').textContent=t==='login'?'Войти':'Зарегистрироваться';
+  document.getElementById('authSubmit').onclick=t==='login'?doLogin:doSignup;
+  const em=document.getElementById('authMsg');if(em)em.remove();
+}
+
+// Restore session on page load
+(function(){currentUser=loadSession();updateNav();})();
+
+// Donate
+let curAmt='$50';
+function openDonate(org){
+  document.getElementById('donateTo').textContent=org||'GiveWorld';
+  document.getElementById('donateModal').classList.add('show');
+}
+function closeDonate(){document.getElementById('donateModal').classList.remove('show')}
+document.getElementById('donateModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDonate()});
+function selAmt(el,val){
+  document.querySelectorAll('.amt-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');curAmt=val;
+  document.getElementById('custWrap').style.display=val?'none':'block';
+  document.getElementById('amtLabel').textContent=val||'Custom';
+}
+function selPay(el,type){
+  document.querySelectorAll('.pay-icon').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  const show=type==='card';
+  document.getElementById('cardFields').style.display=show?'block':'none';
+  document.getElementById('cardPreview').style.display=show?'block':'none';
+}
+function fmtCard(el){
+  let v=el.value.replace(/\D/g,'').substring(0,16);
+  el.value=v.replace(/(.{4})/g,'$1 ').trim();
+  document.getElementById('prevNum').textContent=el.value||'•••• •••• •••• ••••';
+}
+function fmtExp(el){
+  let v=el.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=2)v=v.substring(0,2)+'/'+v.substring(2);
+  el.value=v;document.getElementById('prevExp').textContent=v||'MM/YY';
+}
+
+function submitDonate(){
+  const btn=document.getElementById('donateBtn');
+  btn.textContent='🔄 Processing securely…';btn.style.opacity='.7';
+  setTimeout(()=>{
+    closeDonate();
+    btn.textContent='Donate '+curAmt+' Securely 🔒';btn.style.opacity='1';
+    const t=document.getElementById('toast');
+    t.style.transform='translateY(0)';t.style.opacity='1';
+    setTimeout(()=>{t.style.transform='translateY(120px)';t.style.opacity='0'},5500);
+  },1800);
+}
+
+// ===== THEME =====
+function toggleTheme(){
+  const isNowLight=!document.documentElement.hasAttribute('data-theme');
+  if(isNowLight){document.documentElement.setAttribute('data-theme','light')}
+  else{document.documentElement.removeAttribute('data-theme')}
+  document.getElementById('themeBtn').textContent=isNowLight?'☀️':'🌙';
+  const dark='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  const light='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  [window._leafletMap, window._globalMap].forEach(m=>{
+    if(!m)return;
+    m.eachLayer(l=>{if(l._url)m.removeLayer(l)});
+    L.tileLayer(isNowLight?light:dark,{attribution:'&copy; CARTO',maxZoom:18}).addTo(m);
+  });
+}
+
+// ===== LANGUAGE =====
+const LANGS={
+  en:{
+    nav_charities:'Charities',nav_centers:'Centers',nav_impact:'Impact',nav_causes:'Causes',nav_global:'Global',
+    nav_signin:'Sign In',nav_donate:'💳 Donate Now',
+    hero_eyebrow:'Trusted by 12M+ donors in 190 countries',
+    hero_h1a:'Make the World',hero_h1b:'Better Together',
+    hero_desc:'One platform uniting every major charitable organisation on Earth. Find your cause, give with confidence, track your impact in real time.',
+    hero_btn_donate:'💳 Donate with Card',hero_btn_browse:'Browse Charities →',
+    stat_raised:'Total raised',stat_charities:'Charities',stat_countries:'Countries',stat_lives_changed:'Lives changed',
+    stat_nations:'Nations',stat_lives:'Lives Changed',
+    ch_tag:'// Global Organisations',ch_h2a:"World's Most Trusted",ch_h2b:'Charities',ch_desc:'Every major charitable organisation, verified and vetted, on one platform.',
+    search_ph:'Search charities, causes, or countries...',search_btn:'Search',
+    f_all:'All',f_elderly:'👴 Elderly',f_disability:'♿ Disability',f_children:'👶 Children',f_hunger:'🍽️ Hunger',f_water:'💧 Water',f_health:'🏥 Health',f_env:'🌿 Environment',f_shelter:'🏠 Shelter',
+    cen_tag:'// Charity Centers',cen_h2a:'Global',cen_h2b:'Charity Centers',cen_h2c:'Around the World',cen_desc:'Physical charity centers and hubs where your donations create direct, on-the-ground impact every single day.',
+    map_title:'// Active Centers',map_count:'20 Locations',
+    imp_tag:'// Proven Impact',imp_h2a:"What We've Achieved",imp_h2b:'Together',imp_desc:'Real numbers from real organisations making real differences every single day.',
+    imp_lives_h:'Lives Fundamentally Changed',imp_med_h:'Medical Treatments',imp_school_h:'Children in School',imp_water_h:'Clean Water',imp_meals_h:'Meals Served',imp_homes_h:'Homes Built',imp_devices_h:'Devices Given',
+    cau_tag:'// Browse by Cause',cau_h2a:'Every Cause',cau_h2b:'Matters',cau_desc:'Whether elderly, disabled, children or environment — your cause is here.',
+    reg_tag:'// Global Reach',reg_h2a:'Active in Every',reg_h2b:'Corner of the World',reg_desc:'No community too remote, no person too forgotten.',
+    reg_africa:'Africa',reg_asia:'Asia Pacific',reg_americas:'Americas',reg_europe:'Europe',reg_mideast:'Middle East',reg_casia:'Central Asia',
+    tes_tag:'// Real Stories',tes_h2a:'Voices of',tes_h2b:'Change',
+    cta_tag:'// Start Today',cta_h2a:'Every Dollar',cta_h2b:'Changes a Life',cta_desc:'Join 12 million donors. Give securely with Visa, Mastercard, PayPal or your social account. Takes under 2 minutes.',
+    cta_btn_donate:'💳 Donate with Card Now',cta_btn_signup:'Create Free Account',
+    foot_desc:"The world's most trusted platform connecting donors with verified charitable organisations creating lasting global impact.",
+    foot_platform:'Platform',foot_company:'Company',foot_support:'Support',
+  },
+  ru:{
+    nav_charities:'Организации',nav_centers:'Центры',nav_impact:'Результаты',nav_causes:'Причины',nav_global:'Глобально',
+    nav_signin:'Войти',nav_donate:'💳 Пожертвовать',
+    hero_eyebrow:'12M+ доноров в 190 странах',
+    hero_h1a:'Сделаем Мир',hero_h1b:'Лучше Вместе',
+    hero_desc:'Единая платформа, объединяющая все крупные благотворительные организации Земли. Найдите своё дело, давайте с уверенностью, отслеживайте результат.',
+    hero_btn_donate:'💳 Пожертвовать',hero_btn_browse:'Смотреть организации →',
+    stat_raised:'Собрано',stat_charities:'Организаций',stat_countries:'Стран',stat_lives_changed:'Изменено жизней',
+    stat_nations:'Стран',stat_lives:'Изменено жизней',
+    ch_tag:'// Организации мира',ch_h2a:'Самые Надёжные',ch_h2b:'Организации',ch_desc:'Все крупные благотворительные организации — проверенные и верифицированные — на одной платформе.',
+    search_ph:'Поиск организаций, причин или стран...',search_btn:'Найти',
+    f_all:'Все',f_elderly:'👴 Пожилые',f_disability:'♿ Инвалиды',f_children:'👶 Дети',f_hunger:'🍽️ Голод',f_water:'💧 Вода',f_health:'🏥 Здоровье',f_env:'🌿 Экология',f_shelter:'🏠 Жильё',
+    cen_tag:'// Благотворительные центры',cen_h2a:'Глобальные',cen_h2b:'Благотворительные центры',cen_h2c:'По всему миру',cen_desc:'Физические центры помощи, где ваши пожертвования создают прямое воздействие каждый день.',
+    map_title:'// Активные центры',map_count:'20 локаций',
+    imp_tag:'// Результаты',imp_h2a:'Чего Мы Достигли',imp_h2b:'Вместе',imp_desc:'Реальные цифры от реальных организаций, меняющих жизни каждый день.',
+    imp_lives_h:'Принципиально изменённых жизней',imp_med_h:'Медицинских процедур',imp_school_h:'Детей в школе',imp_water_h:'Чистая вода',imp_meals_h:'Накормлено людей',imp_homes_h:'Построено домов',imp_devices_h:'Устройств передано',
+    cau_tag:'// По причинам',cau_h2a:'Каждая Причина',cau_h2b:'Важна',cau_desc:'Пожилые, инвалиды, дети или экология — ваше дело здесь.',
+    reg_tag:'// Глобальный охват',reg_h2a:'Активны в Каждом',reg_h2b:'Уголке Мира',reg_desc:'Ни одно сообщество не слишком далёкое, ни один человек не забыт.',
+    reg_africa:'Африка',reg_asia:'Азиатско-Тихоокеанский',reg_americas:'Америка',reg_europe:'Европа',reg_mideast:'Ближний Восток',reg_casia:'Центральная Азия',
+    tes_tag:'// Истории',tes_h2a:'Голоса',tes_h2b:'Перемен',
+    cta_tag:'// Начните Сегодня',cta_h2a:'Каждый Доллар',cta_h2b:'Меняет Жизнь',cta_desc:'Присоединяйтесь к 12 миллионам доноров. Давайте безопасно через Visa, Mastercard, PayPal. Занимает менее 2 минут.',
+    cta_btn_donate:'💳 Пожертвовать сейчас',cta_btn_signup:'Создать аккаунт',
+    foot_desc:'Самая надёжная платформа мира, соединяющая доноров с проверенными благотворительными организациями.',
+    foot_platform:'Платформа',foot_company:'Компания',foot_support:'Поддержка',
+  },
+  uz:{
+    nav_charities:'Xayriya',nav_centers:'Markazlar',nav_impact:'Natijalar',nav_causes:'Sabablar',nav_global:'Global',
+    nav_signin:'Kirish',nav_donate:'💳 Xayriya qilish',
+    hero_eyebrow:"190 mamlakatda 12M+ xayriyachi",
+    hero_h1a:"Dunyoni",hero_h1b:"Birga Yaxshilaymiz",
+    hero_desc:"Yer yuzidagi barcha yirik xayriya tashkilotlarini birlashtirgan yagona platforma. O'z ishingizni toping, ishonch bilan bering.",
+    hero_btn_donate:"💳 Xayriya qilish",hero_btn_browse:"Tashkilotlarni ko'rish →",
+    stat_raised:"Yig'ilgan",stat_charities:"Tashkilotlar",stat_countries:"Davlatlar",stat_lives_changed:"O'zgargan hayotlar",
+    stat_nations:"Davlatlar",stat_lives:"O'zgargan hayotlar",
+    ch_tag:"// Dunyo tashkilotlari",ch_h2a:"Eng Ishonchli",ch_h2b:"Xayriya tashkilotlari",ch_desc:"Barcha yirik xayriya tashkilotlari — tekshirilgan va tasdiqlangan — bitta platformada.",
+    search_ph:"Tashkilot, sabab yoki mamlakatni qidiring...",search_btn:"Qidirish",
+    f_all:"Barchasi",f_elderly:"👴 Keksalar",f_disability:"♿ Nogironlar",f_children:"👶 Bolalar",f_hunger:"🍽️ Ochlik",f_water:"💧 Suv",f_health:"🏥 Salomatlik",f_env:"🌿 Ekologiya",f_shelter:"🏠 Uy-joy",
+    cen_tag:"// Xayriya markazlari",cen_h2a:"Global",cen_h2b:"Xayriya markazlari",cen_h2c:"Butun dunyoda",cen_desc:"Sizning xayriyangiz bevosita ta'sir ko'rsatadigan jismoniy markazlar.",
+    map_title:"// Faol markazlar",map_count:"20 ta joylashuv",
+    imp_tag:"// Natijalar",imp_h2a:"Nimalarga Erishdik",imp_h2b:"Birga",imp_desc:"Har kuni hayot o'zgartiruvchi real tashkilotlardan real raqamlar.",
+    imp_lives_h:"Tubdan o'zgargan hayotlar",imp_med_h:"Tibbiy muolajalar",imp_school_h:"Maktabdagi bolalar",imp_water_h:"Toza suv",imp_meals_h:"Ovqatlangan odamlar",imp_homes_h:"Qurilgan uylar",imp_devices_h:"Berilgan qurilmalar",
+    cau_tag:"// Sabab bo'yicha",cau_h2a:"Har Bir Sabab",cau_h2b:"Muhim",cau_desc:"Keksalar, nogironlar, bolalar yoki ekologiya — sizning ishingiz shu yerda.",
+    reg_tag:"// Global qamrov",reg_h2a:"Har Bir",reg_h2b:"Burchakda Faolmiz",reg_desc:"Hech bir jamoa uzoq emas, hech bir inson unutilmagan.",
+    reg_africa:"Afrika",reg_asia:"Osiyo-Tinch okeani",reg_americas:"Amerika",reg_europe:"Evropa",reg_mideast:"Yaqin Sharq",reg_casia:"Markaziy Osiyo",
+    tes_tag:"// Hikoyalar",tes_h2a:"O'zgarish",tes_h2b:"Ovozlari",
+    cta_tag:"// Bugun Boshlang",cta_h2a:"Har Bir Dollar",cta_h2b:"Hayot O'zgartiradi",cta_desc:"12 million xayriyachiga qo'shiling. Visa, Mastercard, PayPal orqali xavfsiz bering. 2 daqiqadan kam vaqt oladi.",
+    cta_btn_donate:"💳 Hozir xayriya qilish",cta_btn_signup:"Hisob yaratish",
+    foot_desc:"Xayriyachilarni tasdiqlangan tashkilotlar bilan bog'laydigan eng ishonchli platforma.",
+    foot_platform:"Platforma",foot_company:"Kompaniya",foot_support:"Yordam",
+  },
+  fr:{
+    nav_charities:'Associations',nav_centers:'Centres',nav_impact:'Impact',nav_causes:'Causes',nav_global:'Mondial',
+    nav_signin:'Connexion',nav_donate:'💳 Faire un don',
+    hero_eyebrow:'12M+ donateurs dans 190 pays',
+    hero_h1a:'Améliorons le Monde',hero_h1b:'Ensemble',
+    hero_desc:'Une plateforme unissant toutes les grandes associations caritatives. Trouvez votre cause, donnez en confiance.',
+    hero_btn_donate:'💳 Faire un don',hero_btn_browse:'Explorer →',
+    stat_raised:'Total collecté',stat_charities:'Associations',stat_countries:'Pays',stat_lives_changed:'Vies changées',
+    stat_nations:'Nations',stat_lives:'Vies changées',
+    ch_tag:'// Organisations mondiales',ch_h2a:'Les Plus Fiables',ch_h2b:'Associations',ch_desc:'Chaque grande organisation caritative, vérifiée et validée, sur une seule plateforme.',
+    search_ph:'Rechercher des associations, causes ou pays...',search_btn:'Rechercher',
+    f_all:'Tous',f_elderly:'👴 Âgés',f_disability:'♿ Handicap',f_children:'👶 Enfants',f_hunger:'🍽️ Faim',f_water:'💧 Eau',f_health:'🏥 Santé',f_env:'🌿 Écologie',f_shelter:'🏠 Logement',
+    cen_tag:'// Centres caritatifs',cen_h2a:'Centres',cen_h2b:'Caritatifs Mondiaux',cen_h2c:'Dans le Monde Entier',cen_desc:'Des centres physiques où vos dons créent un impact direct chaque jour.',
+    map_title:'// Centres actifs',map_count:'20 emplacements',
+    imp_tag:'// Impact prouvé',imp_h2a:'Ce Que Nous Avons',imp_h2b:'Accompli Ensemble',imp_desc:'Des chiffres réels de vraies organisations qui font une vraie différence.',
+    imp_lives_h:'Vies Fondamentalement Changées',imp_med_h:'Traitements médicaux',imp_school_h:"Enfants à l'école",imp_water_h:'Eau potable',imp_meals_h:'Repas servis',imp_homes_h:'Maisons construites',imp_devices_h:'Appareils donnés',
+    cau_tag:'// Par cause',cau_h2a:'Chaque Cause',cau_h2b:'Compte',cau_desc:'Personnes âgées, handicapées, enfants ou environnement — votre cause est ici.',
+    reg_tag:'// Portée mondiale',reg_h2a:'Actif dans Chaque',reg_h2b:'Coin du Monde',reg_desc:'Aucune communauté trop éloignée, aucune personne oubliée.',
+    reg_africa:'Afrique',reg_asia:'Asie-Pacifique',reg_americas:'Amériques',reg_europe:'Europe',reg_mideast:'Moyen-Orient',reg_casia:'Asie Centrale',
+    tes_tag:'// Témoignages',tes_h2a:'Voix du',tes_h2b:'Changement',
+    cta_tag:'// Commencez',cta_h2a:'Chaque Euro',cta_h2b:'Change une Vie',cta_desc:'Rejoignez 12 millions de donateurs. Donnez en toute sécurité avec Visa, Mastercard ou PayPal.',
+    cta_btn_donate:'💳 Faire un don maintenant',cta_btn_signup:'Créer un compte',
+    foot_desc:"La plateforme la plus fiable au monde connectant les donateurs aux associations vérifiées.",
+    foot_platform:'Plateforme',foot_company:'Société',foot_support:'Support',
+  },
+  ar:{
+    nav_charities:'المنظمات',nav_centers:'المراكز',nav_impact:'الأثر',nav_causes:'القضايا',nav_global:'عالمي',
+    nav_signin:'تسجيل الدخول',nav_donate:'💳 تبرع الآن',
+    hero_eyebrow:'12 مليون+ متبرع في 190 دولة',
+    hero_h1a:'لنجعل العالم',hero_h1b:'أفضل معاً',
+    hero_desc:'منصة واحدة تجمع جميع المنظمات الخيرية الكبرى. اعثر على قضيتك، تبرع بثقة.',
+    hero_btn_donate:'💳 تبرع الآن',hero_btn_browse:'تصفح المنظمات ←',
+    stat_raised:'إجمالي المجموع',stat_charities:'منظمة',stat_countries:'دولة',stat_lives_changed:'حياة تغيّرت',
+    stat_nations:'دولة',stat_lives:'حياة تغيّرت',
+    ch_tag:'// منظمات عالمية',ch_h2a:'الأكثر موثوقية',ch_h2b:'في العالم',ch_desc:'كل منظمة خيرية كبرى، موثقة ومعتمدة، على منصة واحدة.',
+    search_ph:'ابحث عن منظمات أو قضايا أو دول...',search_btn:'بحث',
+    f_all:'الكل',f_elderly:'👴 المسنون',f_disability:'♿ ذوو الإعاقة',f_children:'👶 الأطفال',f_hunger:'🍽️ الجوع',f_water:'💧 المياه',f_health:'🏥 الصحة',f_env:'🌿 البيئة',f_shelter:'🏠 المسكن',
+    cen_tag:'// مراكز الخير',cen_h2a:'مراكز الخير',cen_h2b:'العالمية',cen_h2c:'حول العالم',cen_desc:'مراكز مادية حيث تُحدث تبرعاتك أثراً مباشراً كل يوم.',
+    map_title:'// المراكز النشطة',map_count:'20 موقع',
+    imp_tag:'// الأثر المُثبت',imp_h2a:'ما أنجزناه',imp_h2b:'معاً',imp_desc:'أرقام حقيقية من منظمات حقيقية تصنع فرقاً حقيقياً.',
+    imp_lives_h:'حياة تغيّرت جذرياً',imp_med_h:'علاجات طبية',imp_school_h:'أطفال في المدرسة',imp_water_h:'مياه نظيفة',imp_meals_h:'وجبات قُدِّمت',imp_homes_h:'منازل بُنيت',imp_devices_h:'أجهزة وُزِّعت',
+    cau_tag:'// حسب القضية',cau_h2a:'كل قضية',cau_h2b:'تهم',cau_desc:'المسنون والمعاقون والأطفال والبيئة — قضيتك هنا.',
+    reg_tag:'// الوصول العالمي',reg_h2a:'نشطون في كل',reg_h2b:'ركن من العالم',reg_desc:'لا مجتمع بعيد جداً، لا شخص منسي.',
+    reg_africa:'أفريقيا',reg_asia:'آسيا والمحيط الهادئ',reg_americas:'الأمريكتان',reg_europe:'أوروبا',reg_mideast:'الشرق الأوسط',reg_casia:'آسيا الوسطى',
+    tes_tag:'// قصص حقيقية',tes_h2a:'أصوات',tes_h2b:'التغيير',
+    cta_tag:'// ابدأ اليوم',cta_h2a:'كل دولار',cta_h2b:'يغيّر حياة',cta_desc:'انضم إلى 12 مليون متبرع. تبرع بأمان عبر Visa أو Mastercard أو PayPal.',
+    cta_btn_donate:'💳 تبرع الآن',cta_btn_signup:'إنشاء حساب',
+    foot_desc:'المنصة الأكثر موثوقية في العالم لربط المتبرعين بالمنظمات الخيرية المعتمدة.',
+    foot_platform:'المنصة',foot_company:'الشركة',foot_support:'الدعم',
+  },
+}
+let curLang='en';
+function setLang(code){
+  curLang=code;
+  const t=LANGS[code]||LANGS.en;
+  // Translate all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key=el.dataset.i18n;
+    if(t[key]!==undefined)el.textContent=t[key];
+  });
+  // Translate placeholders
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key=el.dataset.i18nPh||el.getAttribute('data-i18n-ph');
+    if(t[key]!==undefined)el.placeholder=t[key];
+  });
+  const flags={en:'🌐 EN',ru:'🌐 RU',uz:'🌐 UZ',fr:'🌐 FR',ar:'🌐 AR'};
+  document.getElementById('langBtn').textContent=flags[code]||'🌐 EN';
+  document.getElementById('langMenu').classList.remove('open');
+  document.documentElement.dir=code==='ar'?'rtl':'ltr';
+  document.documentElement.lang=code;
+}
+function toggleLangMenu(){document.getElementById('langMenu').classList.toggle('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('#langWrap'))document.getElementById('langMenu').classList.remove('open')});
+
+// ===== CHARITY FILTER CHIPS =====
+document.querySelectorAll('.filter-chips .chip').forEach(c=>c.addEventListener('click',function(){
+  document.querySelectorAll('.filter-chips .chip').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+  const f=this.dataset.filter||'all';
+  document.querySelectorAll('.ch-grid .cc').forEach(card=>{
+    const cat=card.dataset.cat||'';
+    const show=f==='all'||cat===f;
+    card.style.display=show?'':'none';
+    if(show){card.classList.add('vis');card.style.opacity='1';card.style.transform='translateY(0)'}
+  });
+}));
+
+// ===== CAUSES FILTER TABS =====
+document.querySelectorAll('.cause-tabs .ctab').forEach(c=>c.addEventListener('click',function(){
+  document.querySelectorAll('.cause-tabs .ctab').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+  const f=this.dataset.filter||'all';
+  document.querySelectorAll('.cause-grid .cau-c').forEach(card=>{
+    const cat=card.dataset.cat||'';
+    const show=f==='all'||cat===f;
+    card.style.display=show?'':'none';
+    if(show){card.classList.add('vis');card.style.opacity='1';card.style.transform='translateY(0)'}
+  });
+}));
+
+// Scroll
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')})},{threshold:.07});
+document.querySelectorAll('.sf,.sf2,.sf3').forEach(el=>obs.observe(el));
+
+// Progress bars
+const bObs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.querySelectorAll('.cc-fill').forEach(f=>{const w=f.style.width;f.style.width='0';setTimeout(()=>f.style.width=w,200)})}})},{threshold:.2});
+document.querySelectorAll('.cc').forEach(c=>bObs.observe(c));
+
+// Counters
+setTimeout(()=>{
+  document.querySelectorAll('.snum').forEach(el=>{
+    const txt=el.innerHTML,m=txt.match(/[\d.]+/);
+    if(!m)return;
+    const tgt=parseFloat(m[0]),suf=txt.replace(/[\d.]+/,'');
+    let c=0,step=tgt/50;
+    const t=setInterval(()=>{c+=step;if(c>=tgt){el.innerHTML=tgt+suf;clearInterval(t);return}el.innerHTML=(Number.isInteger(tgt)?Math.floor(c):c.toFixed(1))+suf},28);
+  });
+},500);
+
+
+
+// ===== LEAFLET MAPS =====
+(function(){
+  const DARK='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  const LIGHT='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  const ATT='&copy; <a href="https://openstreetmap.org">OSM</a> &copy; <a href="https://carto.com">CARTO</a>';
+
+  const centers=[
+    {n:"ICRC — Red Cross HQ",loc:"Geneva, CH",lat:46.23,lon:6.14,col:"#ef4444",tag:"Emergency Aid",s1:"192",l1:"Countries",s2:"1863",l2:"Founded"},
+    {n:"UNHCR — UN Refugees",loc:"Geneva, CH",lat:46.21,lon:6.15,col:"#3b82f6",tag:"UN Agency",s1:"26M+",l1:"Refugees",s2:"1950",l2:"Founded"},
+    {n:"MSF — Врачи без Границ",loc:"Geneva, CH",lat:46.22,lon:6.13,col:"#ef4444",tag:"Medical",s1:"70+",l1:"Countries",s2:"1971",l2:"Founded"},
+    {n:"WWF",loc:"Gland, CH",lat:46.42,lon:6.27,col:"#22c55e",tag:"Environment",s1:"1.2B",l1:"Acres",s2:"100+",l2:"Countries"},
+    {n:"British Red Cross",loc:"London, UK",lat:51.52,lon:-0.09,col:"#ef4444",tag:"Emergency",s1:"3M+",l1:"Helped/yr",s2:"1870",l2:"Founded"},
+    {n:"Oxfam",loc:"Oxford, UK",lat:51.73,lon:-1.20,col:"#00f0a8",tag:"Poverty",s1:"90+",l1:"Countries",s2:"21M",l2:"Helped"},
+    {n:"Save the Children",loc:"London, UK",lat:51.50,lon:-0.10,col:"#00f0a8",tag:"Children",s1:"200M",l1:"Reached",s2:"1919",l2:"Founded"},
+    {n:"HelpAge",loc:"London, UK",lat:51.49,lon:-0.12,col:"#8b5cf6",tag:"Elderly",s1:"80+",l1:"Countries",s2:"1983",l2:"Founded"},
+    {n:"UNICEF HQ",loc:"New York, USA",lat:40.75,lon:-73.97,col:"#3b82f6",tag:"UN Children",s1:"45M+",l1:"Children/yr",s2:"190",l2:"Countries"},
+    {n:"Habitat for Humanity",loc:"Americus, USA",lat:32.07,lon:-84.24,col:"#f59e0b",tag:"Shelter",s1:"150K+",l1:"Homes",s2:"70",l2:"Countries"},
+    {n:"Habitat ReStore",loc:"Atlanta, USA",lat:33.75,lon:-84.36,col:"#f59e0b",tag:"Shelter",s1:"⭐4.4",l1:"Rating",s2:"2002",l2:"Est."},
+    {n:"UNICEF Kenya",loc:"Nairobi, Kenya",lat:-1.23,lon:36.82,col:"#3b82f6",tag:"UN Children",s1:"54M",l1:"Reached",s2:"1952",l2:"Est."},
+    {n:"Awaan Charitable Trust",loc:"Mumbai, India",lat:19.03,lon:72.86,col:"#8b5cf6",tag:"Disability",s1:"24/7",l1:"Open",s2:"⭐5.0",l2:"Rating"},
+    {n:"London Humanitarian Hub",loc:"London, UK",lat:51.515,lon:-0.075,col:"#3b82f6",tag:"Urban Aid",s1:"2,400",l1:"People/mo",s2:"40+",l2:"Charities"},
+    {n:"Hope Refugee Center",loc:"Jordan Border",lat:32.50,lon:36.50,col:"#ef4444",tag:"Emergency",s1:"8,500",l1:"Residents",s2:"180",l2:"Staff"},
+    {n:"Africa Children Hub",loc:"Nairobi, Kenya",lat:-1.32,lon:36.88,col:"#00f0a8",tag:"Children",s1:"3,200",l1:"Children",s2:"95",l2:"Teachers"},
+    {n:"ElderCare Berlin",loc:"Berlin, Germany",lat:52.52,lon:13.40,col:"#8b5cf6",tag:"Senior Care",s1:"600",l1:"Residents",s2:"140",l2:"Carers"},
+    {n:"Clean Water Hub",loc:"Dhaka, Bangladesh",lat:23.81,lon:90.41,col:"#00f0a8",tag:"Water & Food",s1:"50K+",l1:"People/mo",s2:"60",l2:"Staff"},
+    {n:"Favela Health Center",loc:"São Paulo, Brazil",lat:-23.55,lon:-46.63,col:"#ef4444",tag:"Health",s1:"80K",l1:"Residents",s2:"320",l2:"Volunteers"},
+    {n:"Central Asia Care Hub",loc:"Tashkent, Uzbekistan",lat:41.30,lon:69.24,col:"#8b5cf6",tag:"Regional Hub",s1:"15K",l1:"Per year",s2:"85",l2:"Staff"},
+  ];
+
+  function mkIcon(col){
+    const s=`<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='${col}' opacity='0.18'/><circle cx='16' cy='16' r='9' fill='${col}'/><circle cx='16' cy='16' r='4.5' fill='rgba(255,255,255,0.9)'/></svg>`;
+    return L.divIcon({html:s,className:'',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18]});
+  }
+
+  function mkPopup(c){
+    const isDark=!document.documentElement.hasAttribute('data-theme');
+    const bg=isDark?'#0d0d18':'#ffffff';
+    const txt=isDark?'#eeedf8':'#111118';
+    const sub=isDark?'#8886a8':'#555577';
+    const brd=isDark?'rgba(0,240,168,.15)':'rgba(0,0,0,.08)';
+    return `<div style="font-family:Syne,sans-serif;min-width:210px;background:${bg};border-radius:4px;padding:2px"><div style="font-size:.88rem;font-weight:700;color:${txt};margin-bottom:2px">${c.n}</div><div style="font-size:.68rem;color:${sub};margin-bottom:7px;font-family:JetBrains Mono,monospace">${c.loc}</div><span style="display:inline-block;padding:2px 9px;border-radius:100px;font-size:.6rem;font-weight:700;background:${c.col}22;color:${c.col};margin-bottom:7px">${c.tag}</span><div style="display:flex;gap:18px;border-top:1px solid ${brd};padding-top:8px;margin-top:2px"><div><div style="font-size:.82rem;font-weight:700;color:${c.col}">${c.s1}</div><div style="font-size:.6rem;color:${sub}">${c.l1}</div></div><div><div style="font-size:.82rem;font-weight:700;color:${c.col}">${c.s2}</div><div style="font-size:.6rem;color:${sub}">${c.l2}</div></div></div></div>`;
+  }
+
+  function initMaps(){
+    // — CENTERS MAP —
+    if(document.getElementById('leafletMap')){
+      const isDark=!document.documentElement.hasAttribute('data-theme');
+      const map=L.map('leafletMap',{scrollWheelZoom:false,zoomControl:true,attributionControl:false}).setView([20,10],2);
+      window._leafletMap=map;
+      L.tileLayer(isDark?DARK:LIGHT,{attribution:ATT,maxZoom:18}).addTo(map);
+      L.control.attribution({prefix:false}).addTo(map);
+      const list=document.getElementById('mapList');
+      centers.forEach((c,i)=>{
+        const marker=L.marker([c.lat,c.lon],{icon:mkIcon(c.col)}).addTo(map);
+        marker.bindPopup(mkPopup(c),{className:'gw-popup',maxWidth:250,closeButton:true});
+        const item=document.createElement('div');
+        item.className='map-item';
+        item.innerHTML=`<div class="map-item-dot" style="background:${c.col}"></div><div><div class="map-item-name">${c.n}</div><div class="map-item-loc">${c.loc}</div></div>`;
+        item.addEventListener('click',()=>{
+          document.querySelectorAll('.map-item').forEach(x=>x.classList.remove('active'));
+          item.classList.add('active');
+          map.flyTo([c.lat,c.lon],5,{duration:1.2,easeLinearity:0.3});
+          setTimeout(()=>marker.openPopup(),1300);
+        });
+        list.appendChild(item);
+      });
+    }
+
+    // — GLOBAL MAP —
+    if(document.getElementById('globalMap')){
+      const isDark=!document.documentElement.hasAttribute('data-theme');
+      const gmap=L.map('globalMap',{scrollWheelZoom:false,zoomControl:false,attributionControl:false}).setView([20,10],1);
+      window._globalMap=gmap;
+      L.tileLayer(isDark?DARK:LIGHT,{attribution:ATT,maxZoom:18}).addTo(gmap);
+      // Add small dots for all centers on global map
+      centers.forEach(c=>{
+        const sm=`<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6' fill='${c.col}' opacity='0.85'/><circle cx='8' cy='8' r='3' fill='rgba(255,255,255,0.8)'/></svg>`;
+        const ico=L.divIcon({html:sm,className:'',iconSize:[16,16],iconAnchor:[8,8]});
+        L.marker([c.lat,c.lon],{icon:ico}).addTo(gmap).bindPopup(`<b>${c.n}</b><br><small>${c.loc}</small>`);
+      });
+    }
+  }
+
+  // Load Leaflet if needed then init
+  if(typeof L!=='undefined'){
+    initMaps();
+  } else {
+    const s=document.createElement('script');
+    s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    s.onload=initMaps;
+    document.head.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
