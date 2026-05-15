@@ -167,6 +167,30 @@ section{position:relative;z-index:1}
 .ic h3{font-size:.95rem;font-weight:700;margin-bottom:6px}
 .ic p{font-size:.78rem;color:var(--text2);line-height:1.65}
 .ic-sm .ic-num{font-size:1.8rem;color:var(--gold)}
+
+/* FAMILY HELP SECTION */
+.family-help{padding:80px 5% 100px}
+.fh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1300px;margin:0 auto}
+.fh-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
+.fh-card:hover{transform:translateY(-5px);box-shadow:0 24px 50px rgba(0,0,0,.4);border-color:rgba(0,240,168,.15)}
+.fh-card-top{padding:22px 22px 0}
+.fh-problem-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.fh-card h4{font-size:1rem;font-weight:700;line-height:1.4;margin-bottom:8px}
+.fh-card p{font-size:.78rem;color:var(--text2);line-height:1.65;margin-bottom:16px}
+.fh-card-nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.fh-num-block{background:var(--bg3);border-radius:10px;padding:10px 8px;text-align:center}
+.fh-num-label{font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.fh-num-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600}
+.fh-num-val.need{color:var(--gold)}
+.fh-num-val.raised{color:var(--accent)}
+.fh-num-val.left{color:var(--accent3)}
+.fh-bar-wrap{padding:0 22px;margin-bottom:16px}
+.fh-bar-hd{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text3);margin-bottom:5px}
+.fh-bar{height:4px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.fh-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width 1s ease}
+.fh-card-btn{margin:0 22px 22px;padding:11px;background:linear-gradient(135deg,var(--accent),#00d490);border:none;border-radius:10px;color:#07070d;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(0,240,168,.25);letter-spacing:.02em}
+.fh-card-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,240,168,.4)}
+
 /* CAUSES */
 .causes{padding:80px 5% 110px}
 .cause-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:50px;flex-wrap:wrap}
@@ -357,6 +381,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 
   <a href="#" class="nav-logo"><div class="logo-mark">🌍</div>Give<em>World</em></a>
   <ul class="nav-links">
     <li><a href="#charities" data-i18n="nav_charities">Charities</a></li>
+    <li><a href="#families" data-i18n="nav_families">Families</a></li>
     <li><a href="#centers" data-i18n="nav_centers">Centers</a></li>
     <li><a href="#causes" data-i18n="nav_causes">Causes</a></li>
     <li><a href="#regions" data-i18n="nav_global">Global</a></li>
@@ -427,6 +452,226 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 
   </div>
 </section>
 
+<!-- FAMILY HELP -->
+<section class="family-help" id="families">
+  <div class="sec-head sf">
+    <div class="sec-tag">// Помощь семьям</div>
+    <h2><span>Реальные Семьи</span><br><i>Реальные Истории</i></h2>
+    <p>Каждая карточка — конкретная семья в трудной ситуации. Ваше пожертвование идёт напрямую к тем, кто в этом нуждается.</p>
+  </div>
+  <div class="fh-grid">
+    <div class="fh-card sf">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(59,130,246,.1);color:#60a5fa">👨‍👩‍👧 Жильё</div>
+        <h4>Семья без крова после пожара</h4>
+        <p>Семья из 5 человек потеряла дом в результате пожара. Нужна аренда жилья на 6 месяцев, восстановление документов и предметы первой необходимости.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$4,200</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$2,730</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$1,470</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">65%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:65%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Семья без крова после пожара')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf2">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(251,191,36,.1);color:#fbbf24">🧒 Дети</div>
+        <h4>Лечение ребёнка с лейкемией</h4>
+        <p>7-летнему Алишеру требуется курс химиотерапии. Семья не может позволить себе лечение без посторонней помощи.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$18,000</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$11,200</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$6,800</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">62%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:62%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Лечение ребёнка с лейкемией')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf3">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(0,240,168,.08);color:#00f0a8">👴 Пожилые</div>
+        <h4>Уход за одинокой бабушкой 87 лет</h4>
+        <p>Одинокая пенсионерка не может передвигаться самостоятельно. Необходимы сиделка, лекарства и адаптация жилья.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$3,600</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$1,980</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$1,620</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">55%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:55%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Уход за одинокой бабушкой 87 лет')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(139,92,246,.1);color:#a78bfa">♿ Инвалидность</div>
+        <h4>Инвалидная коляска для Дилнозы</h4>
+        <p>14-летняя девочка с ДЦП уже 3 года не выходит из дома. Нужна специальная электрическая коляска для реабилитации.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$2,800</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$2,240</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$560</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">80%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:80%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Инвалидная коляска для Дилнозы')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf2">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(244,63,94,.1);color:#fb7185">🍞 Голод</div>
+        <h4>Многодетная семья без дохода</h4>
+        <p>Отец потерял работу, мать в больнице. 4 детей школьного возраста. Нужна помощь продуктами и коммунальными платежами на 3 месяца.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$1,500</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$870</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$630</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">58%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:58%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Многодетная семья без дохода')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf3">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(251,191,36,.1);color:#fbbf24">🏫 Образование</div>
+        <h4>Оплата учёбы способного студента</h4>
+        <p>Камол поступил в университет с отличием, но семья не может оплатить первый год обучения. Грант покроет полную стоимость.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$5,000</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$3,850</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$1,150</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">77%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:77%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Оплата учёбы способного студента')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(59,130,246,.1);color:#60a5fa">💊 Здоровье</div>
+        <h4>Операция на сердце для главы семьи</h4>
+        <p>45-летний отец 3 детей нуждается в срочной операции на сердце. Без неё прогноз неблагоприятный. Страховка не покрывает.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$12,000</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$7,440</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$4,560</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">62%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:62%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Операция на сердце для главы семьи')">Помочь сейчас ❤️</button>
+    </div>
+    <div class="fh-card sf2">
+      <div class="fh-card-top">
+        <div class="fh-problem-tag" style="background:rgba(244,63,94,.1);color:#fb7185">🌊 Стихия</div>
+        <h4>Восстановление после наводнения</h4>
+        <p>Семья фермеров потеряла весь урожай и скот после наводнения. Нужна помощь для восстановления хозяйства и зимовки.</p>
+        <div class="fh-card-nums">
+          <div class="fh-num-block">
+            <div class="fh-num-label">Нужно</div>
+            <div class="fh-num-val need">$6,500</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Собрано</div>
+            <div class="fh-num-val raised">$3,120</div>
+          </div>
+          <div class="fh-num-block">
+            <div class="fh-num-label">Не хватает</div>
+            <div class="fh-num-val left">$3,380</div>
+          </div>
+        </div>
+      </div>
+      <div class="fh-bar-wrap">
+        <div class="fh-bar-hd"><span>Прогресс</span><span style="color:var(--accent)">48%</span></div>
+        <div class="fh-bar"><div class="fh-bar-fill" style="width:48%"></div></div>
+      </div>
+      <button class="fh-card-btn" onclick="openDonate('Восстановление после наводнения')">Помочь сейчас ❤️</button>
+    </div>
+  </div>
+</section>
+
+
 <!-- CHARITY CENTERS -->
 <section class="centers" id="centers">
   <div class="sec-head sf"><div class="sec-tag" data-i18n="cen_tag">// Charity Centers</div><h2><span data-i18n="cen_h2a">Global</span> <i data-i18n="cen_h2b">Charity Centers</i><br><span data-i18n="cen_h2c">Around the World</span></h2><p data-i18n="cen_desc">Physical charity centers and hubs where your donations create direct, on-the-ground impact every single day.</p></div>
@@ -481,20 +726,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 
   </div>
 </section> -->
 
-<!-- CAUSES -->
-<section class="causes" id="causes">
-  <div class="sec-head sf"><div class="sec-tag" data-i18n="cau_tag">// Browse by Cause</div><h2><span data-i18n="cau_h2a">Every Cause</span> <i data-i18n="cau_h2b">Matters</i></h2><p data-i18n="cau_desc">Whether elderly, disabled, children or environment — your cause is here.</p></div>
-  <div class="cause-tabs"><button class="ctab on" data-filter="all" data-i18n="f_all">All</button><button class="ctab" data-filter="elderly" data-i18n="f_elderly">👴 Elderly</button><button class="ctab" data-filter="disability" data-i18n="f_disability">♿ Disability</button><button class="ctab" data-filter="children" data-i18n="f_children">👶 Children</button><button class="ctab" data-filter="hunger" data-i18n="f_hunger">🍽️ Hunger</button><button class="ctab" data-filter="water" data-i18n="f_water">💧 Water</button><button class="ctab" data-filter="environment" data-i18n="f_env">🌿 Planet</button><button class="ctab" data-filter="shelter" data-i18n="f_shelter">🏠 Shelter</button></div>
-  <div class="cause-grid">
-    <div class="cau-c sf" data-cat="elderly"><div class="cau-img" style="background:linear-gradient(135deg,#151528,#1f1a40)">🏡</div><div class="cau-body"><h4>Дома престарелых</h4><p>Дома престарелых и дневные центры для одиноких пожилых людей. Горячее питание, медицинская помощь и уважение к достоинству тех, кого общество забыло.</p><div class="cau-raised">$842K of $1.2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
-    <div class="cau-c sf2" data-cat="disability"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f15,#1a3020)">♿</div><div class="cau-body"><h4>Инвалидные коляски для всех</h4><p>Средства передвижения, протезы и адаптивное оборудование для людей с ограниченными возможностями, которые не могут себе их позволить.</p><div class="cau-raised">$430K of $600K raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:72%"></div></div></div></div>
-    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1f0f0f,#3d1515)">👶</div><div class="cau-body"><h4>Уход за сиротами и образование</h4><p>Безопасные дома, образование и любовь, которые помогут осиротевшим детям полностью раскрыть свой потенциал.</p><div class="cau-raised">$2.1M of $3M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
-    <div class="cau-c sf" data-cat="health"><div class="cau-img" style="background:linear-gradient(135deg,#101525,#1a2540)">💊</div><div class="cau-body"><h4>Медицина для бедных</h4><p>Необходимые лекарства и лечение для людей, живущих в условиях крайней нищеты и не имеющих доступа к базовой медицинской помощи.</p><div class="cau-raised">$1.5M of $2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:75%"></div></div></div></div>
-    <div class="cau-c sf2" data-cat="environment"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f10,#1a3015)">🌱</div><div class="cau-body"><h4>Климат и восстановление лесов</h4><p>Высадка лесов и борьба с изменением климата для сохранения Земли для будущих поколений.</p><div class="cau-raised">$980K of $1.5M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:65%"></div></div></div></div>
-    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1a1505,#332b0a)">📚</div><div class="cau-body"><h4>Доступ к образованию</h4><p>Качественное образование для каждого ребенка независимо от происхождения, географического положения или экономического статуса.</p><div class="cau-raised">$3.4M of $4M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:85%"></div></div></div></div>
-  </div>
-</section>
-
 <!-- GLOBAL REGIONS -->
 <section class="worldmap-sec" id="regions">
   <div class="sec-head sf"><div class="sec-tag" data-i18n="reg_tag">// Global Reach</div><h2><span data-i18n="reg_h2a">Active in Every</span><br><i data-i18n="reg_h2b">Corner of the World</i></h2><p data-i18n="reg_desc">No community too remote, no person too forgotten.</p></div>
@@ -519,6 +750,22 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 
     </div>
   </div>
 </section>
+
+<!-- CAUSES -->
+<section class="causes" id="causes">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="cau_tag">// Browse by Cause</div><h2><span data-i18n="cau_h2a">Every Cause</span> <i data-i18n="cau_h2b">Matters</i></h2><p data-i18n="cau_desc">Whether elderly, disabled, children or environment — your cause is here.</p></div>
+  <div class="cause-tabs"><button class="ctab on" data-filter="all" data-i18n="f_all">All</button><button class="ctab" data-filter="elderly" data-i18n="f_elderly">👴 Elderly</button><button class="ctab" data-filter="disability" data-i18n="f_disability">♿ Disability</button><button class="ctab" data-filter="children" data-i18n="f_children">👶 Children</button><button class="ctab" data-filter="hunger" data-i18n="f_hunger">🍽️ Hunger</button><button class="ctab" data-filter="water" data-i18n="f_water">💧 Water</button><button class="ctab" data-filter="environment" data-i18n="f_env">🌿 Planet</button><button class="ctab" data-filter="shelter" data-i18n="f_shelter">🏠 Shelter</button></div>
+  <div class="cause-grid">
+    <div class="cau-c sf" data-cat="elderly"><div class="cau-img" style="background:linear-gradient(135deg,#151528,#1f1a40)">🏡</div><div class="cau-body"><h4>Дома престарелых</h4><p>Дома престарелых и дневные центры для одиноких пожилых людей. Горячее питание, медицинская помощь и уважение к достоинству тех, кого общество забыло.</p><div class="cau-raised">$842K of $1.2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
+    <div class="cau-c sf2" data-cat="disability"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f15,#1a3020)">♿</div><div class="cau-body"><h4>Инвалидные коляски для всех</h4><p>Средства передвижения, протезы и адаптивное оборудование для людей с ограниченными возможностями, которые не могут себе их позволить.</p><div class="cau-raised">$430K of $600K raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:72%"></div></div></div></div>
+    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1f0f0f,#3d1515)">👶</div><div class="cau-body"><h4>Уход за сиротами и образование</h4><p>Безопасные дома, образование и любовь, которые помогут осиротевшим детям полностью раскрыть свой потенциал.</p><div class="cau-raised">$2.1M of $3M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
+    <div class="cau-c sf" data-cat="health"><div class="cau-img" style="background:linear-gradient(135deg,#101525,#1a2540)">💊</div><div class="cau-body"><h4>Медицина для бедных</h4><p>Необходимые лекарства и лечение для людей, живущих в условиях крайней нищеты и не имеющих доступа к базовой медицинской помощи.</p><div class="cau-raised">$1.5M of $2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:75%"></div></div></div></div>
+    <div class="cau-c sf2" data-cat="environment"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f10,#1a3015)">🌱</div><div class="cau-body"><h4>Климат и восстановление лесов</h4><p>Высадка лесов и борьба с изменением климата для сохранения Земли для будущих поколений.</p><div class="cau-raised">$980K of $1.5M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:65%"></div></div></div></div>
+    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1a1505,#332b0a)">📚</div><div class="cau-body"><h4>Доступ к образованию</h4><p>Качественное образование для каждого ребенка независимо от происхождения, географического положения или экономического статуса.</p><div class="cau-raised">$3.4M of $4M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:85%"></div></div></div></div>
+  </div>
+</section>
+
+
 
 <!-- TESTIMONIALS -->
 <section class="testis">
