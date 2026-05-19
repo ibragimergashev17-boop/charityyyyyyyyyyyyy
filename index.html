@@ -381,10 +381,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 
   <a href="#" class="nav-logo"><div class="logo-mark">🌍</div>Give<em>World</em></a>
   <ul class="nav-links">
     <li><a href="#charities" data-i18n="nav_charities">Charities</a></li>
+    <li><a href="#causes" data-i18n="nav_causes">Causes</a></li>
     <li><a href="#families" data-i18n="nav_families">Families</a></li>
     <li><a href="#centers" data-i18n="nav_centers">Centers</a></li>
     <li><a href="#regions" data-i18n="nav_global">Global</a></li>
-    <li><a href="#causes" data-i18n="nav_causes">Causes</a></li>
   </ul>
   <div class="nav-end">
     <div class="lang-wrap" id="langWrap">
@@ -449,6 +449,20 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 5% 
     <div class="cc sf" data-cat="shelter"><div class="cc-top"><div class="cc-logo" style="background:rgba(251,191,36,.1)">🏠</div><div class="cc-info"><h4>Habitat for Humanity</h4><span class="cc-badge" style="background:rgba(251,191,36,.08);color:#fbbf24">🏡 Shelter</span></div></div><p class="cc-desc">Строим дома и дарим надежду с 1976 года. Сотрудничаем с семьями, предоставляя им безопасное и доступное жилье в более чем 70 странах мира.</p><div class="cc-nums"><div><div class="cn-v">70+</div><div class="cn-l">Countries</div></div><div><div class="cn-v">150K</div><div class="cn-l">Homes</div></div><div><div class="cn-v">700K</div><div class="cn-l">Families</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Build Goal 2024</span><span style="color:var(--accent)">68%</span></div><div class="cc-bar"><div class="cc-fill" style="width:68%"></div></div></div><button class="donate-btn" onclick="openDonate('Habitat')">Donate Now 🏗️</button></div>
     <div class="cc sf2" data-cat="environment"><div class="cc-top"><div class="cc-logo" style="background:rgba(0,240,168,.08)">🐼</div><div class="cc-info"><h4>World Wildlife Fund</h4><span class="cc-badge" style="background:rgba(0,240,168,.06);color:var(--accent)">🌿 Environment</span></div></div><p class="cc-desc">Защита природы и борьба с изменением климата в более чем 100 странах — сохранение жизни на Земле для будущих поколений.</p><div class="cc-nums"><div><div class="cn-v">100+</div><div class="cn-l">Countries</div></div><div><div class="cn-v">1.2B</div><div class="cn-l">Acres saved</div></div><div><div class="cn-v">5,000+</div><div class="cn-l">Projects</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Forest Protection</span><span style="color:var(--accent)">71%</span></div><div class="cc-bar"><div class="cc-fill" style="width:71%"></div></div></div><button class="donate-btn" onclick="openDonate('WWF')">Donate Now 🐼</button></div>
     <div class="cc sf3" data-cat="health"><div class="cc-top"><div class="cc-logo" style="background:rgba(59,130,246,.1)">🕊️</div><div class="cc-info"><h4>UNHCR – Refugees</h4><span class="cc-badge" style="background:rgba(59,130,246,.08);color:#60a5fa">🕊️ Refugees</span></div></div><p class="cc-desc">Агентство ООН по делам беженцев защищает более 26 миллионов перемещенных лиц по всему миру — предоставляет убежище, юридическую защиту и возможности для восстановления жизни после конфликтов.</p><div class="cc-nums"><div><div class="cn-v">135</div><div class="cn-l">Nations</div></div><div><div class="cn-v">26M</div><div class="cn-l">Refugees</div></div><div><div class="cn-v">$4.8B</div><div class="cn-l">Budget</div></div></div><div class="cc-bar-wrap"><div class="cc-bar-hd"><span>Shelter Goal</span><span style="color:var(--accent)">63%</span></div><div class="cc-bar"><div class="cc-fill" style="width:63%"></div></div></div><button class="donate-btn" onclick="openDonate('UNHCR')">Donate Now 🕊️</button></div>
+  </div>
+</section>
+
+<!-- CAUSES -->
+<section class="causes" id="causes">
+  <div class="sec-head sf"><div class="sec-tag" data-i18n="cau_tag">// Browse by Cause</div><h2><span data-i18n="cau_h2a">Every Cause</span> <i data-i18n="cau_h2b">Matters</i></h2><p data-i18n="cau_desc">Whether elderly, disabled, children or environment — your cause is here.</p></div>
+  <div class="cause-tabs"><button class="ctab on" data-filter="all" data-i18n="f_all">All</button><button class="ctab" data-filter="elderly" data-i18n="f_elderly">👴 Elderly</button><button class="ctab" data-filter="disability" data-i18n="f_disability">♿ Disability</button><button class="ctab" data-filter="children" data-i18n="f_children">👶 Children</button><button class="ctab" data-filter="hunger" data-i18n="f_hunger">🍽️ Hunger</button><button class="ctab" data-filter="water" data-i18n="f_water">💧 Water</button><button class="ctab" data-filter="environment" data-i18n="f_env">🌿 Planet</button><button class="ctab" data-filter="shelter" data-i18n="f_shelter">🏠 Shelter</button></div>
+  <div class="cause-grid">
+    <div class="cau-c sf" data-cat="elderly"><div class="cau-img" style="background:linear-gradient(135deg,#151528,#1f1a40)">🏡</div><div class="cau-body"><h4>Дома престарелых</h4><p>Дома престарелых и дневные центры для одиноких пожилых людей. Горячее питание, медицинская помощь и уважение к достоинству тех, кого общество забыло.</p><div class="cau-raised">$842K of $1.2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
+    <div class="cau-c sf2" data-cat="disability"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f15,#1a3020)">♿</div><div class="cau-body"><h4>Инвалидные коляски для всех</h4><p>Средства передвижения, протезы и адаптивное оборудование для людей с ограниченными возможностями, которые не могут себе их позволить.</p><div class="cau-raised">$430K of $600K raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:72%"></div></div></div></div>
+    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1f0f0f,#3d1515)">👶</div><div class="cau-body"><h4>Уход за сиротами и образование</h4><p>Безопасные дома, образование и любовь, которые помогут осиротевшим детям полностью раскрыть свой потенциал.</p><div class="cau-raised">$2.1M of $3M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:70%"></div></div></div></div>
+    <div class="cau-c sf" data-cat="health"><div class="cau-img" style="background:linear-gradient(135deg,#101525,#1a2540)">💊</div><div class="cau-body"><h4>Медицина для бедных</h4><p>Необходимые лекарства и лечение для людей, живущих в условиях крайней нищеты и не имеющих доступа к базовой медицинской помощи.</p><div class="cau-raised">$1.5M of $2M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:75%"></div></div></div></div>
+    <div class="cau-c sf2" data-cat="environment"><div class="cau-img" style="background:linear-gradient(135deg,#0f1f10,#1a3015)">🌱</div><div class="cau-body"><h4>Климат и восстановление лесов</h4><p>Высадка лесов и борьба с изменением климата для сохранения Земли для будущих поколений.</p><div class="cau-raised">$980K of $1.5M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:65%"></div></div></div></div>
+    <div class="cau-c sf3" data-cat="children"><div class="cau-img" style="background:linear-gradient(135deg,#1a1505,#332b0a)">📚</div><div class="cau-body"><h4>Доступ к образованию</h4><p>Качественное образование для каждого ребенка независимо от происхождения, географического положения или экономического статуса.</p><div class="cau-raised">$3.4M of $4M raised</div><div class="cau-mini-bar"><div class="cau-mini-fill" style="width:85%"></div></div></div></div>
   </div>
 </section>
 
@@ -1027,7 +1041,7 @@ function toggleTheme(){
 // ===== LANGUAGE =====
 const LANGS={
   en:{
-    nav_charities:'Charities',nav_centers:'Centers',nav_impact:'Impact',nav_causes:'Causes',nav_global:'Global',
+    nav_charities:'Charities',nav_centers:'Centers', nav_families:'Families', nav_impact:'Impact',nav_causes:'Causes',nav_global:'Global',
     nav_signin:'Sign In',nav_donate:'💳 Donate Now',
     hero_eyebrow:'Trusted by 12M+ donors in 190 countries',
     hero_h1a:'Make the World',hero_h1b:'Better Together',
@@ -1038,6 +1052,7 @@ const LANGS={
     ch_tag:'// Global Organisations',ch_h2a:"World's Most Trusted",ch_h2b:'Charities',ch_desc:'Every major charitable organisation, verified and vetted, on one platform.',
     search_ph:'Search charities, causes, or countries...',search_btn:'Search',
     f_all:'All',f_elderly:'👴 Elderly',f_disability:'♿ Disability',f_children:'👶 Children',f_hunger:'🍽️ Hunger',f_water:'💧 Water',f_health:'🏥 Health',f_env:'🌿 Environment',f_shelter:'🏠 Shelter',
+    
     cen_tag:'// Charity Centers',cen_h2a:'Global',cen_h2b:'Charity Centers',cen_h2c:'Around the World',cen_desc:'Physical charity centers and hubs where your donations create direct, on-the-ground impact every single day.',
     map_title:'// Active Centers',map_count:'20 Locations',
     imp_tag:'// Proven Impact',imp_h2a:"What We've Achieved",imp_h2b:'Together',imp_desc:'Real numbers from real organisations making real differences every single day.',
@@ -1052,7 +1067,7 @@ const LANGS={
     foot_platform:'Platform',foot_company:'Company',foot_support:'Support',
   },
   ru:{
-    nav_charities:'Организации',nav_centers:'Центры',nav_impact:'Результаты',nav_causes:'Причины',nav_global:'Глобально',
+    nav_charities:'Организации',nav_centers:'Центры', nav_families:'Семьи', nav_impact:'Результаты',nav_causes:'Причины',nav_global:'Глобально',
     nav_signin:'Войти',nav_donate:'💳 Пожертвовать',
     hero_eyebrow:'12M+ доноров в 190 странах',
     hero_h1a:'Сделаем Мир',hero_h1b:'Лучше Вместе',
@@ -1077,7 +1092,7 @@ const LANGS={
     foot_platform:'Платформа',foot_company:'Компания',foot_support:'Поддержка',
   },
   uz:{
-    nav_charities:'Xayriya',nav_centers:'Markazlar',nav_impact:'Natijalar',nav_causes:'Sabablar',nav_global:'Global',
+    nav_charities:'Xayriya',nav_centers:'Markazlar', nav_families:'Oilalar', nav_impact:'Natijalar',nav_causes:'Sabablar',nav_global:'Global',
     nav_signin:'Kirish',nav_donate:'💳 Xayriya qilish',
     hero_eyebrow:"190 mamlakatda 12M+ xayriyachi",
     hero_h1a:"Dunyoni",hero_h1b:"Birga Yaxshilaymiz",
@@ -1102,7 +1117,7 @@ const LANGS={
     foot_platform:"Platforma",foot_company:"Kompaniya",foot_support:"Yordam",
   },
   fr:{
-    nav_charities:'Associations',nav_centers:'Centres',nav_impact:'Impact',nav_causes:'Causes',nav_global:'Mondial',
+    nav_charities:'Associations',nav_centers:'Centres',nav_families:'Familles',nav_impact:'Impact',nav_causes:'Causes',nav_global:'Mondial',
     nav_signin:'Connexion',nav_donate:'💳 Faire un don',
     hero_eyebrow:'12M+ donateurs dans 190 pays',
     hero_h1a:'Améliorons le Monde',hero_h1b:'Ensemble',
@@ -1127,7 +1142,7 @@ const LANGS={
     foot_platform:'Plateforme',foot_company:'Société',foot_support:'Support',
   },
   ar:{
-    nav_charities:'المنظمات',nav_centers:'المراكز',nav_impact:'الأثر',nav_causes:'القضايا',nav_global:'عالمي',
+    nav_charities:'المنظمات',nav_centers:'المراكز',nav_families:'العائلات',nav_impact:'الأثر',nav_causes:'القضايا',nav_global:'عالمي',
     nav_signin:'تسجيل الدخول',nav_donate:'💳 تبرع الآن',
     hero_eyebrow:'12 مليون+ متبرع في 190 دولة',
     hero_h1a:'لنجعل العالم',hero_h1b:'أفضل معاً',
